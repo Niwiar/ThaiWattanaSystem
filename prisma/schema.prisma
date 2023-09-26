@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int                  @id @default(autoincrement())
+  username           String               @unique
+  password           String
+  email              String               @unique
+  permission         String
+  active             Boolean              @default(true)
+  employeePayment    EmployeePayment[]
+  employeeAttendance EmployeeAttendance[]
+  employeeLeave      EmployeeLeave[]
+
+  @@map("user")
+}
+
+model SettingWorking {
+  id            Int      @id @default(autoincrement())
+  workday       String
+  startWorktime DateTime @db.Time
+  stopWorktime  DateTime @db.Time
+  leaveBusiness Int
+  leaveSick     Int
+  updateAt      DateTime @default(now())
+
+  @@map("mdWorking")
+}
+
+model Holiday {
+  id   Int      @id @default(autoincrement())
+  date DateTime @db.Date
+  name String
+
+  @@map("holiday")
+}
+
+model Position {
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  salary   Float
+  payType  Int // 0 Hourly, 1 Daily, 2 Monthly
+  active   Boolean    @default(true)
+  employee Employee[]
+
+  @@map("position")
+}
+
+model Payment {
+  id              Int               @id @default(autoincrement())
+  type            Int // 1 OT, 2 Allowance, 3 Welfare, 4 Deduction
+  name            String            @unique
+  amount          Float
+  payType         Int // 1 Hourly, 2 Daily, 3 Monthly
+  active          Boolean           @default(true)
+  employeePayment EmployeePayment[]
+
+  @@map("payment")
+}
+
+model Employee {
+  id                 BigInt               @id @default(autoincrement())
+  firstname          String
+  lastname           String?
+  birthdate          DateTime?            @db.Date
+  gender             String
+  address            String?
+  tel                String?
+  nationality        String?
+  citizenId          String?
+  citizenCardFile    String?
+  jobApplicationFile String?
+  imageFile          String?
+  workPermitFile     String?
+  active             Boolean              @default(true)
+  positionId         Int?
+  position           Position?            @relation(fields: [positionId], references: [id])
+  employeeAttendance EmployeeAttendance[]
+  employeeLeave      EmployeeLeave[]
+  employeePayment    EmployeePayment[]
+
+  @@map("employee")
+}
+
+model EmployeeAttendance {
+  id         BigInt   @id @default(autoincrement())
+  employeeId BigInt
+  createdBy  Int?
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [createdBy], references: [id])
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("employeeAttendance")
+}
+
+model EmployeeLeave {
+  id         BigInt   @id @default(autoincrement())
+  employeeId BigInt
+  leaveType  Int // 1 Late, 2 Business, 3 Sick
+  date       DateTime
+  createdAt  DateTime @default(now())
+  createdBy  Int?
+  user       User?    @relation(fields: [createdBy], references: [id])
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("employeeLeave")
+}
+
+model EmployeePayment {
+  id         BigInt   @id @default(autoincrement())
+  employeeId BigInt
+  paymentId  Int
+  date       DateTime
+  startTime  DateTime @db.Time
+  endTime    DateTime @db.Time
+  createdAt  DateTime @default(now())
+  createdBy  Int?
+  user       User?    @relation(fields: [createdBy], references: [id])
+  payment    Payment  @relation(fields: [paymentId], references: [id])
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("employeePayment")
+}
