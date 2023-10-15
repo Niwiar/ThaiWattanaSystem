@@ -2,7 +2,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import type { Actions, RequestEvent } from './$types';
 
 import { z } from 'zod';
-import { setRefreshToken, setToken } from '$lib/server/jwt';
+import { setRefreshToken, setToken } from '$server/jwt';
 
 const schema = z.object({
 	username: z.string().nonempty({ message: 'Username is required' }),

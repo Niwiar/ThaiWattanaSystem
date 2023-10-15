@@ -4,16 +4,20 @@ import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad, RequestEvent } from './$types';
 
 import { z } from 'zod';
-import { imageFileSchema } from '$src/lib/schema';
+import { imageFileSchema } from '$lib/schema';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const employeeRes = await fetch('/api/employee?dataField=full');
 	const positionRes = await fetch('/api/position?dataField=dropdown');
+	const holidayRes = await fetch('/api/holiday');
 	const employee = await employeeRes.json();
 	const position = await positionRes.json();
+	const holidays = await holidayRes.json();
+
 	return {
 		employees: employeeRes.status == 200 ? employee.data : null,
-		positions: positionRes.status == 200 ? position.data : null
+		positions: positionRes.status == 200 ? position.data : null,
+		holidays: holidayRes.status == 200 ? holidays.data : null
 	};
 };
 
@@ -75,7 +79,7 @@ export const actions: Actions = {
 		return {
 			type: 'employee',
 			success: true,
-			message: 'Employee create success'
+			message: `เพิ่มข้อมูลพนักงาน ${employee.data.firstname} สำเร็จ`
 		};
 	},
 	editEmployee: async (event: RequestEvent) => {
@@ -110,7 +114,17 @@ export const actions: Actions = {
 		return {
 			type: 'employee',
 			success: true,
-			message: 'Employee edit success'
+			message: `แก้ไขข้อมูลพนักงาน ${employee.data.firstname} สำเร็จ`
 		};
+	},
+	deleteEmployee: async (event: RequestEvent) => {
+		const { request, fetch } = event;
+		const formData = Object.fromEntries(await request.formData());
+
+		const res = await fetch(`/api/employee/${formData.id}`, { method: 'DELETE' });
+		const data = await res.json();
+		if (res.status != 200) return fail(403, { error: true, message: data.message });
+		console.log(data.employee);
+		return { type: 'employee', success: true, message: `ลบข้อมูลพนักงานสำเร็จ` };
 	}
 };

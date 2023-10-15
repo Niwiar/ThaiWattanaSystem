@@ -35,7 +35,7 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 	});
 
 	if (isDup) {
-		if (isDup.active) throw error(403, 'Duplicate username or email');
+		if (isDup.active) throw error(403, 'Duplicate position');
 		else {
 			await db.position.update({
 				data: { salary, payType, active: true },

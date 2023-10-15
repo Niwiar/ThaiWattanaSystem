@@ -1,10 +1,17 @@
 <script lang="ts">
-	import type { CalendarOptions, EventSourceInput } from 'svelte-fullcalendar';
+	import type { BusinessHoursInput, CalendarOptions, EventSourceInput } from 'svelte-fullcalendar';
 	import dayGridPlugin from '@fullcalendar/daygrid';
 	import interactionPlugin from '@fullcalendar/interaction';
 	import { onMount } from 'svelte';
 
 	export let events: EventSourceInput = [];
+	export let handleEvent: (event: any) => void = () => {};
+	export let handleDay: (date: any, event: any) => void = () => {};
+	export let businessHours: BusinessHoursInput = {
+		daysOfWeek: [1, 2, 3, 4, 5, 6],
+		startTime: '08:00',
+		endTime: '17:00'
+	};
 
 	let FullCalendar: any = null;
 
@@ -27,10 +34,6 @@
 		},
 		height: '100%',
 		weekends: true,
-		navLinks: true,
-		navLinkDayClick: function (date) {
-			console.log('day', date.toISOString());
-		},
 		eventBackgroundColor: 'transparent',
 		eventBorderColor: 'transparent',
 		eventTextColor: 'gray',
@@ -40,20 +43,14 @@
 			meridiem: false,
 			hour12: false
 		},
-		businessHours: {
-			daysOfWeek: [1, 2, 3, 4, 5, 6],
-			startTime: '08:00',
-			endTime: '17:00'
-		},
-		eventDidMount: (info) => {
-			if (info.event.extendedProps.status === 'done') {
-				info.borderColor = 'green';
-			}
-		}
-		// dateClick: (e) => console.log(e.dayEl)
+		businessHours: businessHours,
+		eventClick: handleEvent,
+		navLinks: true,
+		navLinkDayClick: handleDay
 	};
 </script>
 
 {#if FullCalendar}
 	<FullCalendar {options} />
+	<!-- <svelte:component this={FullCalendar} {options} /> -->
 {/if}

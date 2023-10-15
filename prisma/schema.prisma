@@ -27,8 +27,8 @@ model User {
 model SettingWorking {
   id            Int      @id @default(autoincrement())
   workday       String
-  startWorktime DateTime @db.Time
-  stopWorktime  DateTime @db.Time
+  startWorktime String
+  stopWorktime  String
   leaveBusiness Int
   leaveSick     Int
   updateAt      DateTime @default(now())
@@ -105,8 +105,10 @@ model EmployeeAttendance {
 model EmployeeLeave {
   id         BigInt   @id @default(autoincrement())
   employeeId BigInt
-  leaveType  Int // 1 Late, 2 Business, 3 Sick
+  leaveType  Int // 1 Late, 2 Absent, 3 Business, 4 Sick
   date       DateTime
+  period     Int? // 1 Allday, 2 Morning, 3 Noon
+  time       Int? // Minute
   createdAt  DateTime @default(now())
   createdBy  Int?
   user       User?    @relation(fields: [createdBy], references: [id])
@@ -119,9 +121,9 @@ model EmployeePayment {
   id         BigInt   @id @default(autoincrement())
   employeeId BigInt
   paymentId  Int
-  date       DateTime
-  startTime  DateTime @db.Time
-  endTime    DateTime @db.Time
+  date       DateTime @db.Date
+  startTime  String
+  endTime    String
   createdAt  DateTime @default(now())
   createdBy  Int?
   user       User?    @relation(fields: [createdBy], references: [id])

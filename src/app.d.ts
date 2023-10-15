@@ -10,7 +10,7 @@ export type UserPermission = {
 export type UserInfo = {
 	id: string;
 	username: string;
-	permission?: UserPermission;
+	permission?: string;
 	iat?: Date;
 	exp?: Date;
 };

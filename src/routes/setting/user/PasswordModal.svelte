@@ -9,14 +9,11 @@
 
 	// Props
 	export let parent: any;
-	export let user = {
-		id: 0,
-		password: ''
-	};
+	export let formData: any;
 </script>
 
 <ModalFormBase {parent}>
-	<input bind:value={user.id} hidden />
+	<input bind:value={formData.id} name="id" hidden />
 	<label class="label gap-2 flex justify-start items-center" for="password">
 		<span class="w-24">Password</span>
 		<div class="flex flex-col">

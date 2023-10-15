@@ -1,5 +1,7 @@
 <script lang="ts">
-	export let alerts: { warning: boolean; warnings: { field: string; message: string }[] };
+	import type { Alert } from '../types/alert';
+
+	export let alerts: Alert;
 	export let field: string;
 </script>
 

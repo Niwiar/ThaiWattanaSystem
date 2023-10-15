@@ -10,7 +10,7 @@
 	<div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
 		<div class="card p-3">
 			<header>
-				<img class="w-48 aspect-[21/9] mx-auto" src={logo} alt="logo" />
+				<img class="w-60 mx-auto" src={logo} alt="logo" />
 			</header>
 			<section>
 				<form method="POST" action="?/login" use:enhance class="space-y-2">

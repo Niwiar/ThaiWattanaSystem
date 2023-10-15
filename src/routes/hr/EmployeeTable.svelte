@@ -16,6 +16,7 @@
 	import Pagination from '$component/table/Pagination.svelte';
 	import ThFilter from '$component/table/ThFilter.svelte';
 	import { FILE_LOCATION } from '$src/constant';
+	import { handleModal } from '$src/lib/action';
 
 	export let employeeSource: EmployeeList[] = [];
 	export let employee = {};
@@ -26,7 +27,8 @@
 
 	const handleSelected = (row: EmployeeList, e: MouseEvent) => {
 		const btn = e.target as HTMLButtonElement;
-		if (btn.nodeName === 'BUTTON') return handleEmployee(row);
+		if (btn.nodeName === 'BUTTON')
+			return handleModal(modalStore, 'Edit Employee', 'editEmployee', EmployeeModal, row);
 		if ($selected.includes(row.id)) {
 			employee = {};
 			$selected = [];
@@ -38,28 +40,6 @@
 	};
 
 	const modalStore = getModalStore();
-
-	const handleEmployee = async (row: EmployeeList) => {
-		const res = await handleEmployeeModal(row);
-		console.log(res);
-	};
-
-	const handleEmployeeModal = (row: EmployeeList) =>
-		new Promise((resolve) => {
-			const modalFormComponent: ModalComponent = {
-				ref: EmployeeModal,
-				props: { employee: row }
-			};
-			const modalForm: ModalSettings = {
-				type: 'component',
-				component: modalFormComponent,
-				title: 'Employee Detail',
-				body: 'Form for ...',
-				value: { action: 'editEmployee' },
-				response: (r) => resolve(r)
-			};
-			modalStore.trigger(modalForm);
-		});
 
 	$: employeeSource, handler.setRows(employeeSource);
 </script>

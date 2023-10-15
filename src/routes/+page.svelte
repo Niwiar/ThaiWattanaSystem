@@ -1,37 +1,12 @@
 <script lang="ts">
 	import wallet from '$lib/assets/wallet.png';
-	import ModalExample from '$lib/components/ModalExample.svelte';
-	import { getModalStore, Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
+	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 
-	const modalStore = getModalStore();
-
-	const handleExpense = () => {
-		console.log('expense');
-	};
 	const handleAccordion = async () => {
 		console.log('accordion');
 		// const res = await handleModal();
 		// console.log(res);
 	};
-
-	const handleModal = () =>
-		new Promise((resolve) => {
-			const modalFormComponent: ModalComponent = {
-				ref: ModalExample,
-				// slot: '<p>Skeleton</p>',
-				props: {}
-			};
-			const modalForm: ModalSettings = {
-				type: 'component',
-				component: modalFormComponent,
-				title: 'Form',
-				body: 'Form for ...',
-				value: '',
-				response: (r) => resolve(r)
-			};
-			modalStore.trigger(modalForm);
-		});
 </script>
 
 <div class="container m-12">

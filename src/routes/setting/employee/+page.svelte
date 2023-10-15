@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 
-	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-	import type { PositionList } from '$src/lib/types/hr';
+	import type { PaymentList, PositionList } from '$src/lib/types/hr';
 	import PayTypeOptions from '$src/lib/components/base/PayTypeOptions.svelte';
 	import PositionTable from './PositionTable.svelte';
 	import PaymentBox from './PaymentBox.svelte';
 	import PaymentModal from './PaymentModal.svelte';
+	import { handleModal } from '$src/lib/action';
+	import { toastError, toastSuccess } from '$src/lib/action/toast.action';
+	import AlertText from '$src/lib/components/AlertText.svelte';
+	import { page } from '$app/stores';
 
 	export let data;
 	export let form;
@@ -17,31 +20,13 @@
 
 	let positionSource: PositionList[];
 
+	let otSrc: PaymentList[] = [];
+	let allowanceSrc: PaymentList[] = [];
+	let welfareSrc: PaymentList[] = [];
+	let deductionSrc: PaymentList[] = [];
+
 	const modalStore = getModalStore();
 	const toastStore = getToastStore();
-
-	const handlePayment = async () => {
-		const res = await handlePaymentModal();
-		console.log(res);
-	};
-
-	const handlePaymentModal = () =>
-		new Promise((resolve) => {
-			const modalFormComponent: ModalComponent = {
-				ref: PaymentModal,
-				// slot: '<p>Skeleton</p>',
-				props: {}
-			};
-			const modalForm: ModalSettings = {
-				type: 'component',
-				component: modalFormComponent,
-				title: 'Create Payment',
-				body: 'Form for ...',
-				value: { action: 'createEmployee' },
-				response: (r) => resolve(r)
-			};
-			modalStore.trigger(modalForm);
-		});
 
 	const handleAddPosition = async () => {
 		if (positionSelected) $positionSelected = [];
@@ -56,34 +41,44 @@
 	};
 
 	$: {
-		if (form?.success) {
-			if (form.type === 'position') positionSettingClose();
-			if (form.type === 'payment' && $modalStore[0].response) $modalStore[0].response(form.message);
-			modalStore.close();
-			toastStore.trigger({
-				message: `✔️ ${form.message}`,
-				timeout: 10000,
-				background: 'variant-filled-success text-surface-100'
+		if (data.payments) {
+			otSrc = data.payments.filter((pay: PaymentList) => pay.type === 1) || [];
+			allowanceSrc = data.payments.filter((pay: PaymentList) => pay.type === 2) || [];
+			welfareSrc = data.payments.filter((pay: PaymentList) => pay.type === 3) || [];
+			deductionSrc = data.payments.filter((pay: PaymentList) => pay.type === 4) || [];
+		}
+		if (data.positions) {
+			positionSource = data.positions.map((position: PositionList) => {
+				let payTypeText: string;
+				switch (position.payType) {
+					case 3:
+						payTypeText = 'รายเดือน';
+						break;
+					case 2:
+						payTypeText = 'รายวัน';
+						break;
+					case 1:
+						payTypeText = 'รายชั่วโมง';
+						break;
+					default:
+						payTypeText = '';
+				}
+				return { ...position, payTypeText };
 			});
 		}
 	}
-	$: positionSource = data.positions?.map((position: PositionList) => {
-		let payTypeText: string;
-		switch (position.payType) {
-			case 3:
-				payTypeText = 'รายเดือน';
-				break;
-			case 2:
-				payTypeText = 'รายวัน';
-				break;
-			case 1:
-				payTypeText = 'รายชั่วโมง';
-				break;
-			default:
-				payTypeText = '';
+
+	$: {
+		if (form?.success) {
+			if (form.type === 'position') positionSettingClose();
+			if (form.type === 'payment' && !form.id) modalStore.close();
+			toastSuccess(toastStore, form.message);
+			form.success = false;
+		} else if (form?.error) {
+			toastError(toastStore, form.message);
+			form.error = false;
 		}
-		return { ...position, payTypeText };
-	});
+	}
 </script>
 
 <div class="space-y-2">
@@ -92,25 +87,44 @@
 		<div class="flex flex-col">
 			<div class="flex justify-between items-center mb-2">
 				<span class="text-lg font-semibold">Payment Setting</span>
-				<button class="btn-icon variant-filled-primary" on:click={handlePayment}>
+				<button
+					class="btn-icon variant-filled-primary"
+					on:click={() => handleModal(modalStore, 'Create Payment', 'createPayment', PaymentModal)}
+				>
 					<i class="fa fa-plus" />
 				</button>
 			</div>
-			<div class="grid grid-cols-2 md:grid-cols-1 xl:grid-cols-2">
+			<div class="grid grid-cols-1 xl:grid-cols-2">
 				<div class="space-y-2">
 					<div>
 						<span class="text-lg">O.T.</span>
-						<PaymentBox pay={{ id: 0, type: 1, name: 'O.T. 1.5x', amount: 0, payType: '1' }} />
+						{#each otSrc as pay}
+							<PaymentBox {pay} />
+						{/each}
 					</div>
 					<div>
 						<span class="text-lg">Allowance</span>
+						{#each allowanceSrc as pay}
+							<PaymentBox {pay} />
+						{/each}
 					</div>
 					<div>
 						<span class="text-lg">Welfare</span>
+						{#each welfareSrc as pay}
+							<PaymentBox {pay} />
+						{/each}
 					</div>
 				</div>
-				<div>
-					<span class="text-lg">Deduction</span>
+				<div class="space-y-2">
+					<div>
+						<span class="text-lg">Deduction</span>
+						{#each deductionSrc as pay}
+							<PaymentBox {pay} />
+						{/each}
+					</div>
+					<AlertText alerts={$page.form} field="name" />
+					<AlertText alerts={$page.form} field="amount" />
+					<AlertText alerts={$page.form} field="payType" />
 				</div>
 			</div>
 		</div>

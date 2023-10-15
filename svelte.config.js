@@ -18,7 +18,8 @@ const config = {
 			$src: './src',
 			$lib: './src/lib',
 			$server: './src/lib/server',
-			$component: './src/lib/components'
+			$component: './src/lib/components',
+			$action: './src/lib/action'
 		},
 		csrf: {
 			checkOrigin: false

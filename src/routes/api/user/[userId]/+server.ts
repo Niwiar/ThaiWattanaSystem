@@ -18,6 +18,7 @@ export const GET: RequestHandler = async ({ params }: RequestEvent) => {
 export const PUT: RequestHandler = async ({ request, params }: RequestEvent) => {
 	const userId = params.userId;
 	const { username, email, permission } = (await request.json()) as User;
+	console.log(permission);
 	try {
 		await db.user.update({
 			data: {

@@ -1,60 +1,39 @@
 <script lang="ts">
-	import { DataHandler } from '@vincjo/datatables';
+	import { page } from '$app/stores';
 
+	import { getModalStore } from '@skeletonlabs/skeleton';
+	import { DataHandler } from '@vincjo/datatables';
 	import IndexCell from '$component/table/IndexCell.svelte';
 	import ThSort from '$component/table/ThSort.svelte';
 	import type { UserList } from '$src/lib/types/hr';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
+	import { handleModal } from '$src/lib/action';
 	import PasswordModal from './PasswordModal.svelte';
+
+	const modalStore = getModalStore();
 
 	export let userSource: UserList[] = [];
 	export let userSetting: boolean;
-	export let user = {};
+	export let userData = {};
 
 	const handler = new DataHandler(userSource, { rowsPerPage: 20 });
 	const rows = handler.getRows();
 
 	export let selected = handler.getSelected();
-	const handleSelected = (row: UserList) => {
+	const handleSelected = (row: UserList, e: MouseEvent) => {
 		const btn = e.target as HTMLButtonElement;
-		if (btn.nodeName === 'BUTTON') return handleChangePass(row);
+		if (btn.nodeName === 'BUTTON' || btn.nodeName === 'path')
+			return handleModal(modalStore, 'Change Password', 'changePassword', PasswordModal, row);
 		if ($selected.includes(row.id)) {
-			user = {};
+			userData = {};
 			$selected = [];
 			userSetting = false;
 			return;
 		}
 		$selected = [];
 		handler.select(row.id);
-		const { hr, production, warehouse, setting } = JSON.parse(row.permission);
-		user = { ...row, hr, production, warehouse, setting };
+		userData = { ...row, ...JSON.parse(row.permission) };
 		userSetting = true;
 	};
-
-	const modalStore = getModalStore();
-
-	const handleChangePass = async (row: UserList) => {
-		const res = await handleChangePassModal(row);
-		console.log(res);
-	};
-
-	const handleChangePassModal = (row: UserList) =>
-		new Promise((resolve) => {
-			const modalFormComponent: ModalComponent = {
-				ref: PasswordModal,
-				props: { employee: row }
-			};
-			const modalForm: ModalSettings = {
-				type: 'component',
-				component: modalFormComponent,
-				title: 'Change Password',
-				body: 'Form for ...',
-				value: { action: 'changePassword' },
-				response: (r) => resolve(r)
-			};
-			modalStore.trigger(modalForm);
-		});
 
 	$: userSource, handler.setRows(userSource);
 </script>
@@ -73,7 +52,7 @@
 			{#each $rows as row, i}
 				<tr
 					class:table-row-checked={$selected.includes(row.id)}
-					on:click={() => handleSelected(row)}
+					on:click={(e) => handleSelected(row, e)}
 				>
 					<IndexCell {handler} rowNumber={i} />
 					<td>{row.username}</td>

@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 
+	export let data;
+
+	$: permission = JSON.parse(data.user?.permission ?? '[]');
+
 	$: classesActive = (href: string) => (href === $page.url.pathname ? '!bg-primary-200' : '');
 </script>
 
@@ -16,9 +20,11 @@
 						>Employee</a
 					>
 				</li>
-				<li>
-					<a href="/setting/user" class="!rounded-lg {classesActive('/setting/user')}">User</a>
-				</li>
+				{#if permission['user'] !== '0'}
+					<li>
+						<a href="/setting/user" class="!rounded-lg {classesActive('/setting/user')}">User</a>
+					</li>
+				{/if}
 			</ul>
 		</nav>
 	</div>

@@ -1,19 +1,33 @@
 <script lang="ts">
-	import type { PaymentList } from '$src/lib/types/hr';
+	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
+	import PayTypeOptions from '$component/base/PayTypeOptions.svelte';
+	import type { PaymentList } from '$lib/types/hr';
 
 	export let pay: PaymentList = { id: 0, name: '', amount: 0, payType: '3' };
 
 	let disabled: boolean = true;
-	let disabledClass = 'disabled:border-none';
+	let disabledClass = 'disabled:border-none disabled:bg-transparent';
 
-	const handleEdit = () => {};
+	$: {
+		if ($page.form?.success) {
+			if ($page.form.type === 'payment' && $page.form.id === pay.id.toString()) disabled = true;
+		}
+	}
 </script>
 
-<form class="ml-2 space-y-1">
-	<label class="label gap-2 flex justify-start items-center" for="name">
-		<span class="w-20">{pay.name}</span>
+<form
+	class="ml-2 space-y-1"
+	method="POST"
+	action="?/editPayment"
+	use:enhance
+	enctype="multipart/form-data"
+>
+	<div class="grid grid-flow-row grid-cols-[1fr_4.2rem_6.5rem_70px]">
+		<input type="text" name="id" bind:value={pay.id} hidden />
+		<input type="text" name="type" bind:value={pay.type} hidden />
 		<input
-			class="input rounded-md p-2 w-20 {disabled && disabledClass}"
+			class="input rounded-md px-2 w-full {disabled && disabledClass}"
 			type="text"
 			name="name"
 			bind:value={pay.name}
@@ -21,7 +35,7 @@
 			{disabled}
 		/>
 		<input
-			class="input rounded-md p-2 w-20 {disabled && disabledClass}"
+			class="input rounded-md px-2 w-full {disabled && disabledClass}"
 			type="text"
 			name="amount"
 			bind:value={pay.amount}
@@ -29,15 +43,28 @@
 			{disabled}
 		/>
 		<select
-			class="select rounded-md p-2 w-28 h-full {disabled && disabledClass}"
+			class="select rounded-md px-2 w-full {disabled && disabledClass}"
 			bind:value={pay.payType}
 			name="payType"
 			{disabled}
 		>
-			<option value="3">บ./เดือน</option>
-			<option value="2">บ./วัน</option>
-			<option value="1">บ./ชั่วโมง</option>
+			<PayTypeOptions />
 		</select>
-		<button class="btn-icon" type="button"><i class="fa fa-edit" /></button>
-	</label>
+		{#if disabled}
+			<button class="btn-icon btn-icon-sm !p-2" type="button" on:click={() => (disabled = false)}>
+				<i class="fa fa-edit" />
+			</button>
+		{/if}
+		{#if !disabled}
+			<div class="flex flex-row justify-end items-center !px-0">
+				<button class="btn-icon btn-icon-sm !p-2" type="submit"><i class="fa fa-save" /></button>
+				<form method="POST" action="?/deletePayment" use:enhance>
+					<input type="text" name="id" bind:value={pay.id} hidden />
+					<button class="btn-icon btn-icon-sm !p-2" type="submit">
+						<i class="fa fa-trash text-danger" />
+					</button>
+				</form>
+			</div>
+		{/if}
+	</div>
 </form>

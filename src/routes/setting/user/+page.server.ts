@@ -4,7 +4,7 @@ import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad, RequestEvent } from './$types';
 
 import { z } from 'zod';
-import { jsonSchema } from '$src/lib/schema';
+import { jsonSchema } from '$lib/schema';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const userRes = await fetch('/api/user');
@@ -32,12 +32,12 @@ export const actions: Actions = {
 	createUser: async (event: RequestEvent) => {
 		const { request, fetch } = event;
 		const formData = Object.fromEntries(await request.formData());
-		const { hr, production, warehouse, setting } = formData;
 		const permission = {
-			hr: hr.toString(),
-			production: production.toString(),
-			warehouse: warehouse.toString(),
-			setting: setting.toString()
+			hr: formData.hr.toString(),
+			production: formData.production.toString(),
+			warehouse: formData.warehouse.toString(),
+			setting: formData.setting.toString(),
+			user: formData.user.toString()
 		};
 		const user = userSchema.safeParse({ ...formData, permission });
 
@@ -66,12 +66,12 @@ export const actions: Actions = {
 	editUser: async (event: RequestEvent) => {
 		const { request, fetch } = event;
 		const formData = Object.fromEntries(await request.formData());
-		const { hr, production, warehouse, setting } = formData;
 		const permission = {
-			hr: hr.toString(),
-			production: production.toString(),
-			warehouse: warehouse.toString(),
-			setting: setting.toString()
+			hr: formData.hr.toString(),
+			production: formData.production.toString(),
+			warehouse: formData.warehouse.toString(),
+			setting: formData.setting.toString(),
+			user: formData.user.toString()
 		};
 		const user = userNoPwSchema.safeParse({ ...formData, permission });
 
@@ -101,6 +101,7 @@ export const actions: Actions = {
 			});
 			return fail(400, { warning: true, warnings });
 		}
+		console.log(formData);
 
 		const res = await fetch(`/api/user/${formData.id}/password`, {
 			method: 'PUT',
@@ -108,7 +109,7 @@ export const actions: Actions = {
 		});
 		const data = await res.json();
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
-		return { type: 'user', success: true, message: `เปลี่ยนรหัสผ่านสำเร็จ` };
+		return { type: 'password', success: true, message: `เปลี่ยนรหัสผ่านสำเร็จ` };
 	},
 	deleteUser: async (event: RequestEvent) => {
 		const { request, fetch } = event;

@@ -9,12 +9,6 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	const modalStore = getModalStore();
 
-	// We've created a custom submit function to pass the response and close the modal.
-	function onFormSubmit(): void {
-		if ($modalStore[0].response) $modalStore[0].response('');
-		modalStore.close();
-	}
-
 	// Base Classes
 	const cBase = 'card w-modal shadow-xl';
 	const cHeader = 'p-4 text-2xl rounded-t-lg font-bold bg-primary-500 text-white';

@@ -2,8 +2,7 @@ import { error, json } from '@sveltejs/kit';
 import type { RequestEvent, RequestHandler } from './$types';
 
 import db from '$server/prisma';
-import type { Employee, Prisma } from '@prisma/client';
-import { writeFile } from '$src/lib';
+import { writeFile } from '$lib';
 
 export const GET: RequestHandler = async ({ params }: RequestEvent) => {
 	const employeeId = params.employeeId;
@@ -16,7 +15,8 @@ export const GET: RequestHandler = async ({ params }: RequestEvent) => {
 	return json({ employee });
 };
 
-export const PUT: RequestHandler = async ({ request }: RequestEvent) => {
+export const PUT: RequestHandler = async ({ request, params }: RequestEvent) => {
+	const employeeId = params.employeeId;
 	const { data, imageFile, citizenCardFile, jobApplicationFile, workPermitFile } =
 		Object.fromEntries(await request.formData());
 
@@ -24,17 +24,21 @@ export const PUT: RequestHandler = async ({ request }: RequestEvent) => {
 	const citizenCardFileName = await writeFile(citizenCardFile, 'card', 'employee');
 	const jobApplicationFileName = await writeFile(jobApplicationFile, 'job', 'employee');
 	const workPermitFileName = await writeFile(workPermitFile, 'permit', 'employee');
-	const employeeData: Prisma.EmployeeCreateInput = { ...(JSON.parse(data.toString()) as Employee) };
-	console.log(employeeData);
+	const body = { ...JSON.parse(data.toString()) };
+	const employeeData = {
+		...body,
+		birthdate: new Date(body.birthdate),
+		positionId: parseInt(body.positionId)
+	};
 
-	const employee = await db.employee.create({
-		data: {
-			...employeeData,
-			imageFile: imageFileName,
-			citizenCardFile: citizenCardFileName,
-			jobApplicationFile: jobApplicationFileName,
-			workPermitFile: workPermitFileName
-		}
+	if (imageFileName) employeeData.imageFile = imageFileName;
+	if (citizenCardFileName) employeeData.citizenCardFile = citizenCardFileName;
+	if (jobApplicationFileName) employeeData.jobApplicationFile = jobApplicationFileName;
+	if (workPermitFileName) employeeData.workPermitFile = workPermitFileName;
+
+	const employee = await db.employee.update({
+		data: employeeData,
+		where: { id: parseInt(employeeId) }
 	});
 	console.log(employee);
 	return json({ message: 'ok' });
@@ -42,7 +46,15 @@ export const PUT: RequestHandler = async ({ request }: RequestEvent) => {
 
 export const DELETE: RequestHandler = async ({ params }: RequestEvent) => {
 	const employeeId = params.employeeId;
-	console.log(employeeId);
+
+	// await db.employee.update({
+	// 	data: { active: false },
+	// 	where: { id: parseInt(employeeId) }
+	// });
+
+	await db.employee.delete({
+		where: { id: parseInt(employeeId) }
+	});
 
 	return json({ message: 'ok' });
 };

@@ -4,7 +4,7 @@ import type { RequestEvent, RequestHandler } from './$types';
 import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from '$env/static/private';
 
 import jwt from 'jsonwebtoken';
-import type { UserInfo } from '../../../../app';
+import type { UserInfo } from '$src/app';
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 	const refreshToken = request.headers.get('authorization')?.split(' ')[1];
