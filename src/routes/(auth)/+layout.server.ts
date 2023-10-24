@@ -8,14 +8,19 @@ export const load: LayoutServerLoad = async ({ locals, url, fetch }: LayoutServe
 			user: locals.user
 		};
 	}
-	const holidayRes = await fetch('/api/holiday');
-	const holidays = await holidayRes.json();
-	const settingRes = await fetch('/api/setting');
-	const setting = await settingRes.json();
+	const dataFetch = async (url: string) => {
+		const res = await fetch(url);
+		const result = await res.json();
+		return res.status == 200 ? result.data : null;
+	};
+	// const holidayRes = await fetch('/api/holiday');
+	// const holidays = await holidayRes.json();
+	// const settingRes = await fetch('/api/setting');
+	// const setting = await settingRes.json();
 	// console.log(holidays.data);
 	return {
 		user: locals.user,
-		setting: settingRes.status == 200 ? setting.data : null,
-		holidays: holidayRes.status == 200 ? holidays.data : null
+		setting: dataFetch('/api/setting'),
+		holidays: dataFetch('/api/holiday')
 	};
 };

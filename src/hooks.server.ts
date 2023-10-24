@@ -45,10 +45,8 @@ export const handleFetch: HandleFetch = async ({ event, fetch, request }) => {
 	return fetch(request);
 };
 
-export const handleError: HandleServerError = async ({ error }) => {
-	console.log(error);
-
-	return { message: 'error' };
+export const handleError: HandleServerError = async ({ error, event }) => {
+	return { message: error as string };
 };
 
 const checkAuth = (url: string, user: UserInfo | null) => {
