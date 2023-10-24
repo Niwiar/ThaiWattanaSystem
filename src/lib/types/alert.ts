@@ -1,1 +1,5 @@
-export type Alert = { warning: boolean; warnings: { field: string; message: string }[] };
+export type Alert = {
+	name: string;
+	warning: boolean;
+	warnings: { field: string; message: string }[];
+};

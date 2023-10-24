@@ -31,7 +31,7 @@
 			<img bind:this={image} src="" {alt} width="80%" />
 		</div>
 	{/if} -->
-	<FileDropzone bind:files {name} on:change={onChange} class="!p-8 !py-4">
+	<FileDropzone bind:files {name} on:change={onChange} class="!p-8 !py-4  variant-filled-surface">
 		<svelte:fragment slot="lead">
 			{#if !src}{title}{/if}
 		</svelte:fragment>

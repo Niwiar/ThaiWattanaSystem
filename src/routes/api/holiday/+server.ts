@@ -13,7 +13,7 @@ export const GET: RequestHandler = async () => {
 	return json({ data: holidays });
 };
 
-export const POST: RequestHandler = async ({ request }: RequestEvent) => {
+export const POST: RequestHandler = async ({ request, setHeaders }: RequestEvent) => {
 	const { name, date } = (await request.json()) as Holiday;
 
 	await db.holiday.create({
@@ -22,6 +22,8 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 			date: new Date(date)
 		}
 	});
-
+	setHeaders({
+		'cache-control': 'max-age=60'
+	});
 	return json({ message: 'ok' });
 };

@@ -15,26 +15,19 @@
 		initializeStores,
 		AppRail,
 		AppRailAnchor,
-		Toast,
-		getToastStore
+		Toast
 	} from '@skeletonlabs/skeleton';
-	import { toastWarning } from '$src/lib/action/toast.action';
 	initializeStores();
 	storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
 	export let data;
 
-	const toastStore = getToastStore();
-
 	const logout = async () => {
 		await fetch('/api/auth/logout', { method: 'POST' });
-		goto(`/login`);
+		goto(`/`);
 	};
 
-	$: if (data.alert) {
-		toastWarning(toastStore, data.alert);
-		data.alert = '';
-	}
+	$: data;
 </script>
 
 <Toast position="t" zIndex="z-[1000]" />
@@ -63,11 +56,11 @@
 			<AppRail
 				class="bg-gradient-to-r from-tertiary-500 to-secondary-900 border-r border-surface-500/30 rounded-tr-lg overflow-hidden text-surface-100"
 			>
-				<AppRailAnchor href="/" selected={$page.url.pathname === '/'}>
+				<AppRailAnchor href="/dashboard" selected={$page.url.pathname === '/dashboard'}>
 					<svelte:fragment slot="lead"><i class="fa fa-home" /></svelte:fragment>
 					<span>Home</span>
 				</AppRailAnchor>
-				<AppRailAnchor href="/hr" selected={$page.url.pathname === '/hr'}>
+				<AppRailAnchor href="/hr" selected={$page.url.pathname.startsWith('/hr')}>
 					<svelte:fragment slot="lead"><i class="fa fa-users" /></svelte:fragment>
 					<span>HR</span>
 				</AppRailAnchor>

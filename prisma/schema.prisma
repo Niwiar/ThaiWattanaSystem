@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -24,16 +25,15 @@ model User {
   @@map("user")
 }
 
-model SettingWorking {
+model Working {
   id            Int      @id @default(autoincrement())
   workday       String
   startWorktime String
   stopWorktime  String
-  leaveBusiness Int
-  leaveSick     Int
+  lateTime      String // Minute
   updateAt      DateTime @default(now())
 
-  @@map("mdWorking")
+  @@map("working")
 }
 
 model Holiday {
@@ -47,12 +47,31 @@ model Holiday {
 model Position {
   id       Int        @id @default(autoincrement())
   name     String     @unique
-  salary   Float
-  payType  Int // 0 Hourly, 1 Daily, 2 Monthly
   active   Boolean    @default(true)
   employee Employee[]
 
   @@map("position")
+}
+
+model Team {
+  id Int @id @default(autoincrement())
+  name String @unique
+  active   Boolean    @default(true)
+  employee Employee[]
+  role Role[]
+
+  @@map("team")
+}
+
+model Role {
+  id Int @id @default(autoincrement())
+  name String
+  teamId Int
+  active   Boolean    @default(true)
+  team Team? @relation(fields: [teamId], references: [id])
+  employee Employee[]
+
+  @@map("role")
 }
 
 model Payment {
@@ -69,20 +88,30 @@ model Payment {
 
 model Employee {
   id                 BigInt               @id @default(autoincrement())
-  firstname          String
-  lastname           String?
+  name          String
+  employeeCode       String @unique
+  salary             Float
+  payType            Int // 0 Hourly, 1 Daily, 2 Monthly
+  leaveBusiness      Int
+  leaveSick          Int
+  workdate           DateTime?            @db.Date
   birthdate          DateTime?            @db.Date
   gender             String
   address            String?
   tel                String?
   nationality        String?
+  socialServiceId    String?
   citizenId          String?
   citizenCardFile    String?
   jobApplicationFile String?
   imageFile          String?
   workPermitFile     String?
   active             Boolean              @default(true)
+  teamId Int?
+  roleId Int?
   positionId         Int?
+  team           Team?            @relation(fields: [teamId], references: [id])
+  role           Role?            @relation(fields: [roleId], references: [id])
   position           Position?            @relation(fields: [positionId], references: [id])
   employeeAttendance EmployeeAttendance[]
   employeeLeave      EmployeeLeave[]

@@ -6,6 +6,7 @@
 	// props
 	export let src: string = '';
 	export let initials: string = '';
+	export let width: string = 'w-60';
 
 	let files: FileList;
 
@@ -23,5 +24,5 @@
 </script>
 
 <FileButton bind:files name="imageFile" button="btn p-0" on:change={onChange}>
-	<Avatar {initials} {src} width="w-36" rounded="rounded-lg bg-transparent" />
+	<Avatar {initials} {src} {width} rounded="rounded-lg bg-transparent" />
 </FileButton>

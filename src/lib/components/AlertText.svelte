@@ -3,9 +3,10 @@
 
 	export let alerts: Alert;
 	export let field: string;
+	export let form: string;
 </script>
 
-{#if alerts?.warning && alerts?.warnings.some((e) => e.field === field)}
+{#if alerts?.name === form && alerts?.warning && alerts?.warnings.some((e) => e.field === field)}
 	<div class="ml-2 alert variant-soft-error !bg-transparent p-0" role="alert">
 		{#each alerts?.warnings || [] as alert, i}
 			{#if alert?.field === field}

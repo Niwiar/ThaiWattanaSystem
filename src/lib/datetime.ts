@@ -3,10 +3,16 @@ type CheckDate = string | Date;
 export const pvToDate = (date?: CheckDate) => new Date(date ?? '');
 
 export const pvGetDate = (date: Date) => {
-	const DD = date.toLocaleString('default', { year: 'numeric' });
+	const DD = date.toLocaleString('default', { day: '2-digit' });
 	const MM = date.toLocaleString('default', { month: '2-digit' });
-	const YYYY = date.toLocaleString('default', { day: '2-digit' });
+	const YYYY = date.getFullYear();
 	return `${YYYY}-${MM}-${DD}`;
+};
+
+export const pvGetMonth = (date: Date) => {
+	const MM = date.toLocaleString('default', { month: '2-digit' });
+	const YYYY = date.getFullYear();
+	return `${YYYY}-${MM}`;
 };
 
 export const pvGetTime = (date: Date) => {

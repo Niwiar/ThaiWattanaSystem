@@ -3,28 +3,27 @@ import type { RequestEvent, RequestHandler } from './$types';
 
 import db from '$server/prisma';
 
-import type { SettingWorking } from '@prisma/client';
+import type { Working } from '@prisma/client';
 
 export const GET: RequestHandler = async () => {
-	const holidays = await db.settingWorking.findFirst({
+	const workday = await db.working.findFirst({
 		orderBy: { updateAt: 'desc' }
 	});
-
-	return json({ data: holidays });
+	return json({ data: workday });
 };
 
-export const POST: RequestHandler = async ({ request }: RequestEvent) => {
-	const { workday, startWorktime, stopWorktime, leaveBusiness, leaveSick } =
-		(await request.json()) as SettingWorking;
-	await db.settingWorking.create({
+export const POST: RequestHandler = async ({ request, setHeaders }: RequestEvent) => {
+	const { workday, startWorktime, stopWorktime, lateTime } = (await request.json()) as Working;
+	await db.working.create({
 		data: {
 			workday: JSON.stringify(workday),
 			startWorktime,
 			stopWorktime,
-			leaveBusiness,
-			leaveSick
+			lateTime
 		}
 	});
-
+	setHeaders({
+		'cache-control': 'max-age=60'
+	});
 	return json({ message: 'ok' });
 };

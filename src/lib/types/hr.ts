@@ -1,9 +1,15 @@
 export type EmployeeList = {
 	id: number;
 	imageFile: string;
-	firstname: string;
-	lastname: string;
+	employeeCode: string;
+	name: string;
 	tel: string;
+	team: {
+		name: string;
+	};
+	role: {
+		name: string;
+	};
 	position: {
 		name: string;
 	};
@@ -12,9 +18,16 @@ export type EmployeeList = {
 export type PositionList = {
 	id: number;
 	name: string;
-	salary: number;
-	payType: number;
-	payTypeText: string;
+};
+
+export type TeamList = {
+	id: number;
+	name: string;
+};
+
+export type RoleList = {
+	id: number;
+	name: string;
 };
 
 export type UserList = {

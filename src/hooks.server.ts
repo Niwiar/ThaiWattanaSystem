@@ -6,17 +6,27 @@ import type { UserInfo } from './app';
 export const handle: Handle = async ({ event, resolve }) => {
 	if (event.url.pathname.startsWith('/api/auth')) {
 		const response = await resolve(event);
+		console.log(event.url.pathname);
 		if (event.url.pathname.endsWith('/logout')) event.locals.user = null;
+		console.log('logout', event.locals.user);
 		return response;
 	}
+	if (event.url.pathname.startsWith('/api/') && event.request.method === 'GET') {
+		return await resolve(event);
+	}
 	event.locals.user = await verifyAuth(event);
-	if (event.url.pathname === '/login') {
-		if (event.locals.user) throw redirect(302, '/');
+	console.log('check', event.url.pathname, event.locals.user);
+	if (event.url.pathname === '/') {
+		if (event.locals.user) {
+			console.log('dashboard');
+			throw redirect(302, '/dashboard');
+		}
+		console.log('login');
 		return resolve(event);
 	}
 	if (!event.locals.user) {
 		const fromUrl = event.url.pathname + event.url.search;
-		throw redirect(302, `/login?redirectTo=${fromUrl}`);
+		throw redirect(302, `/?redirectTo=${fromUrl}`);
 	}
 	const response = await resolve(event);
 
@@ -35,9 +45,8 @@ export const handleFetch: HandleFetch = async ({ event, fetch, request }) => {
 	return fetch(request);
 };
 
-export const handleError: HandleServerError = async ({ error, event }) => {
+export const handleError: HandleServerError = async ({ error }) => {
 	console.log(error);
-	console.log(event);
 
 	return { message: 'error' };
 };
