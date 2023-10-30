@@ -1,21 +1,20 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { fail } from '@sveltejs/kit';
+import { ActionFailure, fail } from '@sveltejs/kit';
 
 import type { Actions, PageServerLoad, RequestEvent } from './$types';
 
 import { z } from 'zod';
 import { imageFileSchema } from '$lib/schema';
-import type { EmployeeList, PositionList } from '$src/lib/types/hr';
 
 export const load: PageServerLoad = async ({ fetch }) => {};
 
 const employeeSchema = z.object({
 	name: z.string().nonempty({ message: 'กรุณาใส่ชื่อ' }),
 	employeeCode: z.string().nonempty({ message: 'กรุณาใส่รหัสพนักงาน' }),
-	salary: z.number(),
-	payType: z.number(),
-	leaveBusiness: z.number(),
-	leaveSick: z.number(),
+	salary: z.string().nonempty({ message: 'กรุณากำหนดเงินเดือน' }),
+	payType: z.string(),
+	leaveBusiness: z.string().nonempty({ message: 'กรุณากำหนดวันลา' }),
+	leaveSick: z.string().nonempty({ message: 'กรุณากำหนดวันลา' }),
 	workdate: z.string().nonempty({ message: 'กรุณาใส่วันที่เริ่มงาน' }),
 	birthdate: z.string().nonempty({ message: 'กรุณาใส่วันเกิด' }),
 	gender: z.enum(['ชาย', 'หญิง', 'LGBTQ+', 'ไม่ระบุ'], {
@@ -38,7 +37,6 @@ const employeeSchema = z.object({
 export const actions: Actions = {
 	createEmployee: async (event: RequestEvent) => {
 		const { request, fetch, params } = event;
-		console.log(params);
 		const formData = Object.fromEntries(await request.formData());
 		const employee = employeeSchema.safeParse(formData);
 
@@ -50,7 +48,7 @@ export const actions: Actions = {
 				};
 			});
 			console.log(warnings);
-			return fail(400, { warning: true, warnings });
+			return fail(400, { name: 'employee', warning: true, warnings });
 		}
 
 		const { imageFile, citizenCardFile, jobApplicationFile, workPermitFile, ...newBody } =
@@ -62,18 +60,17 @@ export const actions: Actions = {
 		body.append('jobApplicationFile', jobApplicationFile as Blob);
 		body.append('workPermitFile', workPermitFile as Blob);
 
-		const res = await fetch('/api/hr/employee', { method: 'POST', body });
+		const res = await fetch('/api/hr/employee', { method: 'POST', body: body });
 		const data = await res.json();
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
 		return {
-			type: 'employee',
+			name: 'employee',
 			success: true,
 			message: `เพิ่มข้อมูลพนักงาน ${employee.data.name} สำเร็จ`
 		};
 	},
 	editEmployee: async (event: RequestEvent) => {
 		const { request, fetch, params } = event;
-		console.log(params);
 		const formData = Object.fromEntries(await request.formData());
 		const employee = employeeSchema.safeParse(formData);
 
@@ -85,7 +82,7 @@ export const actions: Actions = {
 				};
 			});
 			console.log(warnings);
-			return fail(400, { warning: true, warnings });
+			return fail(400, { name: 'employee', warning: true, warnings });
 		}
 
 		const { imageFile, citizenCardFile, jobApplicationFile, workPermitFile, ...newBody } =
@@ -97,11 +94,11 @@ export const actions: Actions = {
 		body.append('jobApplicationFile', jobApplicationFile as Blob);
 		body.append('workPermitFile', workPermitFile as Blob);
 
-		const res = await fetch(`/api/hr/employee/${formData.id}`, { method: 'PUT', body });
+		const res = await fetch(`/api/hr/employee/${formData.id}`, { method: 'PUT', body: body });
 		const data = await res.json();
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
 		return {
-			type: 'employee',
+			name: 'employee',
 			success: true,
 			message: `แก้ไขข้อมูลพนักงาน ${employee.data.name} สำเร็จ`
 		};
@@ -113,7 +110,6 @@ export const actions: Actions = {
 		const res = await fetch(`/api/hr/employee/${formData.id}`, { method: 'DELETE' });
 		const data = await res.json();
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
-		console.log(data.employee);
-		return { type: 'employee', success: true, message: `ลบข้อมูลพนักงานสำเร็จ` };
+		return { name: 'employee', success: true, message: `ลบข้อมูลพนักงานสำเร็จ` };
 	}
 };

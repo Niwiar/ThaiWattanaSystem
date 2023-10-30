@@ -6,10 +6,12 @@
 	import { pvGetMonth } from '$src/lib/datetime';
 	import { page } from '$app/stores';
 
+	export let height: String = 'h-[40rem]';
 	export let events: EventSourceInput = [];
 	export let date = pvGetMonth(new Date());
 	export let handleEvent: (event: any) => void = () => {};
 	export let handleDay: (date: any, event: any) => void = () => {};
+	$: height;
 
 	let businessHours: BusinessHoursInput = {
 		daysOfWeek: [1, 2, 3, 4, 5, 6],
@@ -107,5 +109,5 @@
 </div>
 {#if FullCalendar}
 	<!-- <FullCalendar class="!h-[40rem]" bind:this={calendarRef} {options} />	 -->
-	<svelte:component this={FullCalendar} class="!h-[40rem]" bind:this={calendarRef} {options} />
+	<svelte:component this={FullCalendar} class="!{height}" bind:this={calendarRef} {options} />
 {/if}

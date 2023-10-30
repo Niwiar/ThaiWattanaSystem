@@ -12,7 +12,6 @@
 	import ThFilter from '$src/lib/components/datatable/ThFilter.svelte';
 	import { FILE_LOCATION } from '$src/constant';
 	import { handleModal } from '$src/lib/action';
-	import ThFilter2 from '$src/lib/components/datatable/ThFilter2.svelte';
 
 	export let employeeSource: EmployeeList[] = [];
 	export let employee = {};
@@ -25,7 +24,11 @@
 		const btn = e.target as HTMLButtonElement;
 		if (btn.nodeName === 'BUTTON')
 			return handleModal(modalStore, 'Edit Employee', 'editEmployee', EmployeeModal, {
-				formData: row,
+				formData: {
+					...row,
+					birthdate: row.birthdate ? row.birthdate.split('T')[0] : null,
+					workdate: row.workdate ? row.workdate.split('T')[0] : null
+				},
 				size: 'w-full max-w-6xl'
 			});
 		if ($selected.includes(row.id)) {
@@ -40,7 +43,7 @@
 
 	const modalStore = getModalStore();
 
-	$: employeeSource, handler.setRows(employeeSource);
+	$: handler.setRows(employeeSource);
 </script>
 
 <header class="flex justify-between items-center m-2">

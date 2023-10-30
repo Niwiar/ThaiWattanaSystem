@@ -52,3 +52,11 @@ export const pvGetWeek = (checkDate: CheckDate): string[] => {
 export const pvGetDayOfWeek = (checkDate: CheckDate) => new Date(checkDate).getDay();
 
 export const pvLastdayInMonth = (month: number, year: number) => new Date(year, month, 0).getDate();
+
+export const pvDiffDate = (before: Date, after: Date): number => {
+	const date1 = new Date(before);
+	const date2 = new Date(after);
+	const diffTime = Math.abs(date2.getTime() - date1.getTime());
+	const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+	return diffDays;
+};

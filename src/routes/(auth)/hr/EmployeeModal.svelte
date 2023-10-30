@@ -7,13 +7,29 @@
 	import AlertText from '$src/lib/components/AlertText.svelte';
 	import { enhance } from '$app/forms';
 	import PayTypeOptions from '$src/lib/components/base/PayTypeOptions.svelte';
+	import { pvDiffDate } from '$src/lib/datetime';
+	import type { RoleList } from '$src/lib/types/hr';
 
 	// Props
 	export let parent: any;
 	export let formData: any = {};
 	export let size: string = '';
 
+	$: employment = pvDiffDate(formData.workdate, new Date());
+
 	let isDisabled: boolean = false;
+	let roleList: any = $page.data.roles;
+
+	$: if (formData.teamId) {
+		fetchRole(formData.teamId);
+	}
+
+	const fetchRole = async (teamId: number) => {
+		const roleRes = await fetch(`/api/hr/team/${teamId}/role?dataField=dropdown`);
+		const roles = await roleRes.json();
+		console.log(roles.data);
+		roleList = roleRes.status == 200 ? (roles.data as RoleList[]) : [];
+	};
 </script>
 
 <ModalFormBase {parent} {size}>
@@ -103,7 +119,7 @@
 								disabled={isDisabled}
 							>
 								<option value="">Choose role</option>
-								{#each $page.data.roles ?? [] as role (role.id)}
+								{#each roleList ?? [] as role (role.id)}
 									<option value={role.id}>{role.name}</option>
 								{/each}
 							</select>
@@ -121,7 +137,7 @@
 						<input
 							bind:value={formData.salary}
 							class="input variant-filled-surface rounded-md px-2 py-1 max-w-[12rem]"
-							type="text"
+							type="number"
 							name="salary"
 							placeholder="Salary"
 							disabled={isDisabled}
@@ -172,19 +188,37 @@
 					</div>
 				</label>
 			</div>
-			<label for="workdate" class="flex justify-start items-center w-full">
-				<span class="w-20">วันที่เริ่มงาน</span>
-				<div class="flex flex-col">
-					<input
-						bind:value={formData.workdate}
-						type="date"
-						class="input variant-filled-surface rounded-md px-2 py-1 w-40"
-						name="workdate"
-						disabled={isDisabled}
-					/>
-					<AlertText alerts={$page.form} form="employee" field="workdate" />
-				</div>
-			</label>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+				<label for="workdate" class="flex justify-start items-center w-full">
+					<span class="w-20">วันที่เริ่มงาน</span>
+					<div class="flex flex-col">
+						<input
+							bind:value={formData.workdate}
+							type="date"
+							class="input variant-filled-surface rounded-md px-2 py-1 w-40"
+							name="workdate"
+							disabled={isDisabled}
+						/>
+						<AlertText alerts={$page.form} form="employee" field="workdate" />
+					</div>
+				</label>
+				<label class="flex items-center" for="employment">
+					<span class="w-20">อายุงาน</span>
+					<div class="flex flex-col">
+						<div class="flex space-x-2">
+							<input
+								bind:value={employment}
+								class="input variant-filled-surface rounded-md px-2 py-1 max-w-[12rem]"
+								type="number"
+								name="employment"
+								placeholder="Employment"
+								disabled={true}
+							/>
+						</div>
+					</div>
+					<span>วัน</span>
+				</label>
+			</div>
 		</div>
 	</div>
 	<div class="grid grid-cols-2">

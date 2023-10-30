@@ -5,7 +5,10 @@ import db from '$server/prisma';
 
 import type { Holiday } from '@prisma/client';
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ setHeaders }: RequestEvent) => {
+	setHeaders({
+		'cache-control': 'max-age=60'
+	});
 	const holidays = await db.holiday.findMany({
 		orderBy: { date: 'desc' }
 	});
@@ -13,7 +16,7 @@ export const GET: RequestHandler = async () => {
 	return json({ data: holidays });
 };
 
-export const POST: RequestHandler = async ({ request, setHeaders }: RequestEvent) => {
+export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 	const { name, date } = (await request.json()) as Holiday;
 
 	await db.holiday.create({
@@ -21,9 +24,6 @@ export const POST: RequestHandler = async ({ request, setHeaders }: RequestEvent
 			name,
 			date: new Date(date)
 		}
-	});
-	setHeaders({
-		'cache-control': 'max-age=60'
 	});
 	return json({ message: 'ok' });
 };

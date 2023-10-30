@@ -28,7 +28,14 @@ export const PUT: RequestHandler = async ({ request, params }: RequestEvent) => 
 	const employeeData = {
 		...body,
 		birthdate: new Date(body.birthdate),
-		positionId: parseInt(body.positionId)
+		workdate: new Date(body.workdate),
+		positionId: parseInt(body.positionId),
+		teamId: parseInt(body.teamId),
+		roleId: parseInt(body.roleId),
+		salary: parseInt(body.salary),
+		payType: parseInt(body.payType),
+		leaveBusiness: parseInt(body.leaveBusiness),
+		leaveSick: parseInt(body.leaveSick)
 	};
 
 	if (imageFileName) employeeData.imageFile = imageFileName;
@@ -52,9 +59,9 @@ export const DELETE: RequestHandler = async ({ params }: RequestEvent) => {
 	// 	where: { id: parseInt(employeeId) }
 	// });
 
-	await db.employee.delete({
-		where: { id: parseInt(employeeId) }
-	});
+	// await db.employee.delete({
+	// 	where: { id: parseInt(employeeId) }
+	// });
 
 	return json({ message: 'ok' });
 };

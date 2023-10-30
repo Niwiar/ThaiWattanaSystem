@@ -151,8 +151,8 @@ model EmployeePayment {
   employeeId BigInt
   paymentId  Int
   date       DateTime @db.Date
-  startTime  String
-  endTime    String
+  payType    Int // 0 Hourly, 1 Daily, 2 Monthly
+  period     Int // Time in Hour/Day/Month Unit
   createdAt  DateTime @default(now())
   createdBy  Int?
   user       User?    @relation(fields: [createdBy], references: [id])

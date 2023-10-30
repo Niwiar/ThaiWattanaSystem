@@ -4,6 +4,8 @@ export type EmployeeList = {
 	employeeCode: string;
 	name: string;
 	tel: string;
+	birthdate: string;
+	workdate: string;
 	team: {
 		name: string;
 	};

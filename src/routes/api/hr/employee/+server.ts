@@ -15,7 +15,9 @@ export const GET: RequestHandler = async ({ url }: RequestEvent) => {
 				where: { active: true },
 				orderBy: { name: 'asc' },
 				include: {
-					position: { select: { name: true } }
+					position: { select: { name: true } },
+					team: { select: { name: true } },
+					role: { select: { name: true } }
 				}
 			});
 			break;
@@ -55,20 +57,24 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 	const jobApplicationFileName = await writeFile(jobApplicationFile, 'job', 'employee');
 	const workPermitFileName = await writeFile(workPermitFile, 'permit', 'employee');
 	const body = { ...JSON.parse(data.toString()) };
-	console.log(body);
-	// const employeeData = {
-	// 	...body,
-	// 	birthdate: new Date(body.birthdate),
-	// 	positionId: parseInt(body.positionId),
-	// 	teamId: parseInt(body.teamId),
-	// 	roleId: parseInt(body.roleId)
-	// };
+	const employeeData = {
+		...body,
+		birthdate: new Date(body.birthdate),
+		workdate: new Date(body.workdate),
+		positionId: parseInt(body.positionId),
+		teamId: parseInt(body.teamId),
+		roleId: parseInt(body.roleId),
+		salary: parseInt(body.salary),
+		payType: parseInt(body.payType),
+		leaveBusiness: parseInt(body.leaveBusiness),
+		leaveSick: parseInt(body.leaveSick)
+	};
 
-	// if (imageFileName) employeeData.imageFile = imageFileName;
-	// if (citizenCardFileName) employeeData.citizenCardFile = citizenCardFileName;
-	// if (jobApplicationFileName) employeeData.jobApplicationFile = jobApplicationFileName;
-	// if (workPermitFileName) employeeData.workPermitFile = workPermitFileName;
-	// await db.employee.create({ data: employeeData });
+	if (imageFileName) employeeData.imageFile = imageFileName;
+	if (citizenCardFileName) employeeData.citizenCardFile = citizenCardFileName;
+	if (jobApplicationFileName) employeeData.jobApplicationFile = jobApplicationFileName;
+	if (workPermitFileName) employeeData.workPermitFile = workPermitFileName;
+	await db.employee.create({ data: employeeData });
 
 	return json({ message: 'ok' });
 };

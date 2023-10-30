@@ -15,7 +15,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return await resolve(event);
 	}
 	event.locals.user = await verifyAuth(event);
-	console.log('check', event.url.pathname, event.locals.user);
+	// console.log('check', event.url.pathname, event.locals.user);
 	if (event.url.pathname === '/') {
 		if (event.locals.user) {
 			console.log('dashboard');
@@ -46,6 +46,7 @@ export const handleFetch: HandleFetch = async ({ event, fetch, request }) => {
 };
 
 export const handleError: HandleServerError = async ({ error, event }) => {
+	console.log(error);
 	return { message: error as string };
 };
 
