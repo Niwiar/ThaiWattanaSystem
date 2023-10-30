@@ -49,5 +49,13 @@ export const DELETE: RequestHandler = async ({ params }: RequestEvent) => {
 		where: { id: parseInt(roleId) }
 	});
 
+	// await db.employee.updateMany({
+	// 	data: { roleId: null },
+	// 	where: { roleId: parseInt(roleId) }
+	// });
+	// await db.role.delete({
+	// 	where: { id: parseInt(roleId) }
+	// });
+
 	return json({ message: 'ok' });
 };

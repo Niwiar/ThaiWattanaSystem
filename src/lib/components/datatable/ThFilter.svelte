@@ -8,7 +8,7 @@
 
 <th class="!p-2">
 	<input
-		class="input variant-ghost-surface px-2 py-1 font-light"
+		class="input rounded-md variant-ghost-surface border-0 px-2 py-1 font-light"
 		type="text"
 		{placeholder}
 		bind:value

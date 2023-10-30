@@ -45,9 +45,28 @@ export const DELETE: RequestHandler = async ({ params }: RequestEvent) => {
 	console.log(teamId);
 
 	await db.team.update({
-		data: { active: false },
+		data: {
+			active: false,
+			role: {
+				updateMany: {
+					data: { active: false },
+					where: { teamId: parseInt(teamId) }
+				}
+			}
+		},
 		where: { id: parseInt(teamId) }
 	});
+
+	// await db.employee.updateMany({
+	// 	data: { teamId:null,roleId: null },
+	// 	where: { roleId: parseInt(teamId) }
+	// });
+	// await db.team.delete({
+	// 	include: {
+	// 		role: { where: { teamId: parseInt(teamId) } }
+	// 	},
+	// 	where: { id: parseInt(teamId) }
+	// });
 
 	return json({ message: 'ok' });
 };

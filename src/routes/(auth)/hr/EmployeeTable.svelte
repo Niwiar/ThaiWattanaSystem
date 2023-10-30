@@ -55,10 +55,10 @@
 		<thead>
 			<tr class="bg-primary-500 text-white">
 				<th rowspan="2" colspan="2" class="text-center">Index</th>
-				<ThSort {handler} orderBy="employeeCode">Code</ThSort>
-				<ThSort {handler} orderBy="firstname">Name</ThSort>
-				<ThSort {handler} orderBy="team">Team</ThSort>
-				<ThSort {handler} orderBy="role">Role</ThSort>
+				<ThSort {handler} class="!justify-center" orderBy="employeeCode">Code</ThSort>
+				<ThSort {handler} class="!justify-center" orderBy="firstname">Name</ThSort>
+				<ThSort {handler} class="!justify-center" orderBy="team">Team</ThSort>
+				<ThSort {handler} class="!justify-center" orderBy="role">Role</ThSort>
 				<th rowspan="2" />
 			</tr>
 			<tr class="bg-primary-500 text-white">
@@ -75,7 +75,7 @@
 					on:click={(e) => handleSelected(row, e)}
 				>
 					<input name="id" value={row.id} hidden />
-					<IndexCell class="!align-middle" {handler} rowNumber={i} />
+					<IndexCell class="!align-middle text-center" {handler} rowNumber={i} />
 					<td class="!align-middle"
 						><Avatar
 							initials={row.name[0] + (row.name[1] || '')}
@@ -84,11 +84,11 @@
 							alt="{row.name}-avatar"
 						/></td
 					>
-					<td class="!align-middle">{row.employeeCode}</td>
+					<td class="!align-middle text-center">{row.employeeCode}</td>
 					<td class="!align-middle">{row.name}</td>
-					<td class="!align-middle">{row.team ? row.team.name : ''}</td>
-					<td class="!align-middle">{row.role ? row.role.name : ''}</td>
-					<td class="!align-middle">
+					<td class="!align-middle text-center">{row.team ? row.team.name : '-'}</td>
+					<td class="!align-middle text-center">{row.role ? row.role.name : '-'}</td>
+					<td class="!align-middle text-center">
 						<button class="btn variant-soft-primary rounded-md">Detail</button>
 					</td>
 				</tr>

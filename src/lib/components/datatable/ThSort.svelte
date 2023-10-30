@@ -8,7 +8,7 @@
 </script>
 
 <th on:click={() => handler.sort(orderBy ?? '')} class:active={$sorted.identifier === identifier}>
-	<div class="flex">
+	<div class="flex {$$props.class}">
 		<slot />
 		<span class:asc={$sorted.direction === 'asc'} class:desc={$sorted.direction === 'desc'} />
 	</div>
