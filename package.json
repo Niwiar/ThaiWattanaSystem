@@ -47,10 +47,12 @@
 	"dependencies": {
 		"@floating-ui/dom": "^1.5.1",
 		"@fortawesome/fontawesome-free": "^6.4.2",
+		"@originjs/vite-plugin-commonjs": "^1.0.3",
 		"@prisma/client": "^5.2.0",
 		"bcrypt": "^5.1.1",
 		"chart.js": "^4.4.0",
 		"jsonwebtoken": "^9.0.1",
+		"node-rtsp-stream": "^0.0.9",
 		"zod": "^3.22.2"
 	}
 }

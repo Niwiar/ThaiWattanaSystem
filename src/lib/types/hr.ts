@@ -6,13 +6,16 @@ export type EmployeeList = {
 	tel: string;
 	birthdate: string;
 	workdate: string;
-	team: {
+	salary?: number;
+	payType?: number;
+	payTypeText?: string;
+	team?: {
 		name: string;
 	};
-	role: {
+	role?: {
 		name: string;
 	};
-	position: {
+	position?: {
 		name: string;
 	};
 };

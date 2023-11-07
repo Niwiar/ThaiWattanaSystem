@@ -16,25 +16,22 @@
 	import ThFilter from '$src/lib/components/datatable/ThFilter.svelte';
 	import { FILE_LOCATION } from '$src/constant';
 	import { handleModal } from '$src/lib/action';
-	import ThFilter2 from '$src/lib/components/datatable/ThFilter2.svelte';
+	import BillingModal from './BillingModal.svelte';
 
 	export let employeeSource: EmployeeList[] = [];
-	export let employee = {};
 
 	const handler = new DataHandler(employeeSource, { rowsPerPage: 20 });
 	const rows = handler.getRows();
 	const selected = handler.getSelected();
 	const isAllSelected = handler.isAllSelected();
 
-	const handleEdit = (row: EmployeeList) => {
-		if ($selected.includes(row.id)) {
-			employee = {};
-			$selected = [];
-			return;
-		}
-		$selected = [];
-		handler.select(row.id);
-		employee = row;
+	const handleEdit = (e: MouseEvent, row: EmployeeList) => {
+		const btn = e.target as HTMLButtonElement;
+		if (btn.nodeName === 'BUTTON')
+			return handleModal(modalStore, 'Edit Employee', 'editEmployee', BillingModal, {
+				formData: row,
+				size: 'w-full max-w-6xl'
+			});
 	};
 
 	const modalStore = getModalStore();
@@ -60,24 +57,25 @@
 		<thead>
 			<tr class="bg-primary-500 text-white">
 				<th rowspan="2" colspan="2" class="text-center">Select</th>
-				<ThSort {handler} orderBy="firstname">Name</ThSort>
-				<ThSort {handler} orderBy="positionId">Position</ThSort>
+				<ThSort {handler} orderBy="employeeCode">Code</ThSort>
+				<ThSort {handler} orderBy="name">Name</ThSort>
+				<ThSort {handler} orderBy="salary">Salary</ThSort>
+				<ThSort {handler} orderBy="payTypeText">Pay Type</ThSort>
 				<th rowspan="2" />
 			</tr>
 			<tr class="bg-primary-500 text-white">
-				<ThFilter2
-					{handler}
-					filterBy1="firstname"
-					placeholder1="firstname"
-					filterBy2="lastname"
-					placeholder2="lastname"
-				/>
-				<ThFilter {handler} filterBy="position" placeholder="position" />
+				<ThFilter {handler} filterBy="employeeCode" placeholder="code" />
+				<ThFilter {handler} filterBy="name" placeholder="name" />
+				<ThFilter {handler} filterBy="salary" placeholder="salary" />
+				<ThFilter {handler} filterBy="payTypeText" placeholder="pay type" />
 			</tr>
 		</thead>
 		<tbody>
 			{#each $rows as row, i}
-				<tr class:table-row-checked={$selected.includes(row.id)} on:click={() => handleEdit(row)}>
+				<tr
+					class:table-row-checked={$selected.includes(row.id)}
+					on:click={(e) => handleEdit(e, row)}
+				>
 					<input name="id" value={row.id} hidden />
 					<td class="!align-middle"
 						><input
@@ -88,16 +86,16 @@
 					>
 					<td class="!align-middle"
 						><Avatar
-							initials="{row.firstname ? row.firstname[0] : ''}{row.lastname
-								? row.lastname[0]
-								: ''}"
+							initials={row.name[0] + (row.name[1] || '')}
 							width="w-12"
 							src={row.imageFile ? FILE_LOCATION + row.imageFile : ''}
-							alt="{row.firstname}-avatar"
+							alt="{row.name}-avatar"
 						/></td
 					>
-					<td class="!align-middle">{row.firstname} {row.lastname}</td>
-					<td class="!align-middle">{row.position ? row.position.name : ''}</td>
+					<td class="!align-middle">{row.employeeCode}</td>
+					<td class="!align-middle">{row.name}</td>
+					<td class="!align-middle">{row.salary}</td>
+					<td class="!align-middle">{row.payTypeText}</td>
 					<td class="!align-middle">
 						<button class="btn variant-soft-primary rounded-md">Detail</button>
 					</td>
