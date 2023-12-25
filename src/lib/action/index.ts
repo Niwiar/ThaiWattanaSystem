@@ -26,3 +26,28 @@ export const handleModal = (
 	};
 	modalStore.trigger(modalForm);
 };
+
+export const handlePreviewModal = (
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	modalStore: any,
+	modal: unknown,
+	props: {
+		formData?: unknown;
+		data: string;
+		title: string;
+	} = {
+		formData: {},
+		data: '',
+		title: ''
+	}
+) => {
+	const modalPreviewComponent: ModalComponent = {
+		ref: modal,
+		props: { ...props }
+	};
+	const modalPreview: ModalSettings = {
+		type: 'component',
+		component: modalPreviewComponent
+	};
+	modalStore.trigger(modalPreview);
+};

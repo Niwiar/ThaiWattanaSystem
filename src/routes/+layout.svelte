@@ -45,7 +45,7 @@
 				<svelte:fragment slot="lead">
 					<img class="w-16 mx-auto" src={logo} alt="logo" />
 				</svelte:fragment>
-				Manage System
+				Management System
 				<svelte:fragment slot="trail">{data.user.username}</svelte:fragment>
 			</AppBar>
 		{/if}

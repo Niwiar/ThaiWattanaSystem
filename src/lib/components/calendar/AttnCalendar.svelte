@@ -9,8 +9,8 @@
 	export let height: String = 'h-[40rem]';
 	export let events: EventSourceInput = [];
 	export let date = pvGetMonth(new Date());
-	export let handleEvent: (event: any) => void = () => {};
-	export let handleDay: (date: any, event: any) => void = () => {};
+	export let handleEvent: ((event: any) => void) | undefined = undefined;
+	export let handleDay: ((date: any, event: any) => void) | undefined = undefined;
 	$: height;
 
 	let businessHours: BusinessHoursInput = {
@@ -72,6 +72,7 @@
 			},
 			height: '100%',
 			weekends: true,
+			displayEventEnd: true,
 			eventBackgroundColor: 'transparent',
 			eventBorderColor: 'transparent',
 			eventTextColor: 'gray',
@@ -81,9 +82,10 @@
 				meridiem: false,
 				hour12: false
 			},
+			eventDisplay: 'auto',
 			businessHours,
 			eventClick: handleEvent,
-			navLinks: true,
+			navLinks: handleDay === undefined ? false : true,
 			navLinkDayClick: handleDay
 		};
 	});
@@ -93,7 +95,7 @@
 	<button class="btn rounded variant-filled-tertiary" on:click={handleToday}>Today</button>
 
 	<input
-		class="input rounded-md px-2 py-1 w-48 variant-ringed-tertiary text-xl text-center"
+		class="input rounded-md px-2 py-1 w-52 variant-ringed-tertiary text-xl text-center"
 		type="month"
 		bind:value={date}
 		on:change={handleDateChange}
@@ -108,6 +110,6 @@
 	</div>
 </div>
 {#if FullCalendar}
-	<!-- <FullCalendar class="!h-[40rem]" bind:this={calendarRef} {options} />	 -->
+	<!-- <FullCalendar class="!{height}" bind:this={calendarRef} {options} /> -->
 	<svelte:component this={FullCalendar} class="!{height}" bind:this={calendarRef} {options} />
 {/if}

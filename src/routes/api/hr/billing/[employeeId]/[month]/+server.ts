@@ -1,16 +1,29 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { error, json } from '@sveltejs/kit';
 import type { RequestEvent, RequestHandler } from './$types';
 
 import db from '$server/prisma';
-
-const checkBilling = async () => {};
+import { getBilling } from '$server/controller/billing.controller';
 
 export const GET: RequestHandler = async ({ params }: RequestEvent) => {
-	const { employeeId, month } = params;
-	const employee = await db.employee.findUnique({
-		where: { id: parseInt(employeeId) }
-	});
-	if (!employee) throw error(404, 'Employee not found');
+	try {
+		const { employeeId, month } = params;
+		const employee = await db.employee.findUnique({
+			select: { salary: true, workdate: true },
+			where: { id: parseInt(employeeId) }
+		});
+		const working = await db.working.findFirst({ orderBy: { updateAt: 'desc' } });
+		if (!working) {
+			throw error(400, { message: 'ไม่มีการตั้งค่าวันทำงาน' });
+		}
+		const data = await getBilling(employeeId, month, employee, working);
 
-	return json({ employee });
+		// console.log(info.data.billing);
+		return json({ data });
+	} catch (err) {
+		console.log(err);
+		throw error(500, {
+			message: 'เกิดข้อผิดพลาด'
+		});
+	}
 };

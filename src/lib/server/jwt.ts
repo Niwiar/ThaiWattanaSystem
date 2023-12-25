@@ -36,7 +36,8 @@ export const setToken = (event: RequestEvent, token: string) => {
 		path: '/',
 		httpOnly: true,
 		sameSite: 'strict',
-		maxAge: 60 * 30
+		maxAge: 60 * 30,
+		secure: false
 	});
 };
 
@@ -46,6 +47,7 @@ export const setRefreshToken = (event: RequestEvent, refreshToken: string) => {
 		httpOnly: true,
 		path: '/',
 		maxAge: 60 * 60 * 24,
-		sameSite: 'strict'
+		sameSite: 'strict',
+		secure: false
 	});
 };

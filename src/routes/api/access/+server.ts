@@ -1,22 +1,29 @@
-import { json, error } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestEvent, RequestHandler } from './$types';
+import { writeFileBuffer } from '$src/lib';
+import type { AttendanceCheck, AttendanceInsert } from '$src/lib/types/attendance';
+import db from '$src/lib/server/prisma';
 
-export const GET: RequestHandler = async ({ request, url }: RequestEvent) => {
-	console.log('GET');
-	const query = url.searchParams;
-	console.log(query);
-	return json({ message: 'ok' });
-};
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
-	console.log('POST');
-	const body = await request.json();
-	console.log(body);
-	return json({ message: 'ok' });
-};
+	const { employeeCode, createdAt, buffer } = (await request.json()) as AttendanceCheck;
+	console.log(createdAt);
+	const date = new Date(createdAt);
+	console.log(employeeCode, date.toLocaleString());
+	const employee = await db.employee.findUnique({
+		select: { id: true },
+		where: { employeeCode: employeeCode }
+	});
+	const data: AttendanceInsert = {
+		employeeId: parseInt(employee?.id.toString() || '0'),
+		createdAt: new Date(createdAt),
+		date: new Date(createdAt),
+		imageFile: null
+	};
+	if (buffer) {
+		data['imageFile'] = await writeFileBuffer(buffer, 'img', 'attendance');
+	}
 
-export const PUT: RequestHandler = async ({ request }: RequestEvent) => {
-	console.log('PUT');
-	const body = await request.json();
-	console.log(body);
+	const attendance = await db.employeeAttendance.create({ data });
+	console.log(attendance);
 	return json({ message: 'ok' });
 };

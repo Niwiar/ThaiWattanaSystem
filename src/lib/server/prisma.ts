@@ -2,12 +2,25 @@ import { PrismaClient } from '@prisma/client';
 
 const db = new PrismaClient().$extends({
 	result: {
-		employee: {
-			fullname: {
-				needs: { firstname: true, lastname: true },
-				compute(employee) {
-					return;
-					`${employee.firstname} ${employee.lastname}`;
+		billing: {
+			tax3: {
+				needs: { salary: true },
+				compute(billing) {
+					return (billing.salary || 0) * 0.03;
+				}
+			},
+			summary: {
+				needs: { income: true, deduction: true },
+				compute(billing) {
+					return (billing.income || 0) - (billing.deduction || 0);
+				}
+			}
+		},
+		employeePayment: {
+			total: {
+				needs: { amount: true, period: true },
+				compute(billing) {
+					return (billing.amount || 0) * (billing.period || 0);
 				}
 			}
 		}

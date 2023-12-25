@@ -19,3 +19,10 @@ export const writeFile = async (file: unknown, type: string, folder: string) => 
 	await fs.writeFile(filePath, Buffer.from(await (file as Blob).arrayBuffer()));
 	return fileName;
 };
+
+export const writeFileBuffer = async (buffer: Buffer, type: string, folder: string) => {
+	const fileName = `${crypto.randomUUID()}_${type}.jpg`;
+	const filePath = path.join(process.cwd(), `static`, folder, fileName);
+	await fs.writeFile(filePath, Buffer.from(buffer));
+	return fileName;
+};

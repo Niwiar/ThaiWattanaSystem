@@ -27,7 +27,6 @@ export const GET: RequestHandler = async ({ url }: RequestEvent) => {
 					id: true,
 					employeeCode: true,
 					name: true,
-					// position: { select: { name: true } },
 					team: { select: { name: true } },
 					role: { select: { name: true } },
 					imageFile: true
@@ -35,13 +34,6 @@ export const GET: RequestHandler = async ({ url }: RequestEvent) => {
 				where: { active: true },
 				orderBy: { name: 'asc' }
 			});
-			// employees = await db.$queryRaw`SELECT row_number() over(order by employee.id) as 'index',
-			//     employee.firstname + ' ' + employee.lastname as 'fullname',
-			//     employee.tel, employee.imageFile, position.name
-			//     FROM employee
-			//     LEFT JOIN position ON employee.positionId = position.id
-			// 		where employee.active = true
-			//     ORDER BY employee.id`;
 			break;
 	}
 

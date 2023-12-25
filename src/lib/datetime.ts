@@ -10,8 +10,11 @@ export const pvGetDate = (date: Date) => {
 };
 
 export const pvGetMonth = (date: Date) => {
-	const MM = date.toLocaleString('default', { month: '2-digit' });
+	let MM: number | string = date.getMonth() + 1;
 	const YYYY = date.getFullYear();
+	if (MM < 10) {
+		MM = '0' + MM;
+	}
 	return `${YYYY}-${MM}`;
 };
 
@@ -23,6 +26,15 @@ export const pvGetTime = (date: Date) => {
 	const mm = date.toLocaleString('default', { minute: '2-digit' });
 	const ss = date.toLocaleString('default', { second: '2-digit' });
 	return `${hh}:${mm}:${ss}`;
+};
+
+export const pvGetHHMM = (date: Date) => {
+	const hh = date.toLocaleString('default', {
+		hour: '2-digit',
+		hour12: false
+	});
+	const mm = date.toLocaleString('default', { minute: '2-digit' });
+	return `${hh}:${mm}`;
 };
 
 export const pvGetDatetime = (date: Date) => `${pvGetDate(date)} ${pvGetTime(date)}`;
@@ -51,12 +63,36 @@ export const pvGetWeek = (checkDate: CheckDate): string[] => {
 
 export const pvGetDayOfWeek = (checkDate: CheckDate) => new Date(checkDate).getDay();
 
-export const pvLastdayInMonth = (month: number, year: number) => new Date(year, month, 0).getDate();
+export const pvLastdayInMonth = (month: string, year: string) =>
+	new Date(parseInt(year), parseInt(month), 0).getDate();
+
+export const pvDiffMonth = (before: Date, after: Date): number => {
+	const date1 = new Date(before);
+	const date2 = new Date(after);
+	const diffTime = date2.getTime() - date1.getTime();
+	const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
+	return diffDays;
+};
 
 export const pvDiffDate = (before: Date, after: Date): number => {
 	const date1 = new Date(before);
 	const date2 = new Date(after);
-	const diffTime = Math.abs(date2.getTime() - date1.getTime());
+	const diffTime = date2.getTime() - date1.getTime();
 	const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 	return diffDays;
 };
+
+export const pvDiffMin = (before: Date, after: Date): number => {
+	const date1 = new Date(before);
+	const date2 = new Date(after);
+	const diffTime = date2.getTime() - date1.getTime();
+	const diffDays = Math.ceil(diffTime / (1000 * 60));
+	return diffDays;
+};
+
+export const pvGetLastDate = (month: string) => {
+	const max = pvLastdayInMonth(month.split('-')[1], month.split('-')[0]);
+	return pvGetMonth(new Date()) !== month ? new Date(`${month}-${max}`) : new Date();
+};
+
+export const pvIsFuture = (date: Date) => date > new Date(pvGetDate(new Date()));

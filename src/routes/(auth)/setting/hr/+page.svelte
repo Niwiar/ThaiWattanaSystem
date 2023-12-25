@@ -58,7 +58,7 @@
 		Object.keys(team).length !== 0 ? fetchRole(team.id) : (roleSource = []);
 	}
 	const fetchRole = async (teamId: number) => {
-		const roleRes = await fetch(`/api/hr/team/${teamId}/role`);
+		const roleRes = await fetch(`/api/setting/team/${teamId}/role`);
 		const roles = await roleRes.json();
 		console.log(roles.data);
 		roleSource = roleRes.status == 200 ? (roles.data as RoleList[]) : [];

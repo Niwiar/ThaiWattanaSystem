@@ -7,13 +7,13 @@ import { z } from 'zod';
 import type { PaymentList, PositionList, RoleList, TeamList } from '$src/lib/types/hr';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const positionRes = await fetch('/api/hr/position');
+	const positionRes = await fetch('/api/setting/position');
 	const positions = await positionRes.json();
-	const paymentRes = await fetch('/api/hr/payment');
+	const paymentRes = await fetch('/api/setting/payment');
 	const payments = await paymentRes.json();
-	const teamRes = await fetch('/api/hr/team');
+	const teamRes = await fetch('/api/setting/team');
 	const teams = await teamRes.json();
-	const roleRes = await fetch('/api/hr/role');
+	const roleRes = await fetch('/api/setting/role');
 	const roles = await roleRes.json();
 	return {
 		positions: positionRes.status == 200 ? (positions.data as PositionList[]) : [],
@@ -60,7 +60,7 @@ export const actions: Actions = {
 			return fail(400, { name: 'position', warning: true, warnings });
 		}
 
-		const res = await fetch('/api/hr/position', {
+		const res = await fetch('/api/setting/position', {
 			method: 'POST',
 			body: JSON.stringify(position.data)
 		});
@@ -87,7 +87,7 @@ export const actions: Actions = {
 			return fail(400, { name: 'position', warning: true, warnings });
 		}
 
-		const res = await fetch(`/api/hr/position/${formData.id}`, {
+		const res = await fetch(`/api/setting/position/${formData.id}`, {
 			method: 'PUT',
 			body: JSON.stringify(position.data)
 		});
@@ -103,7 +103,7 @@ export const actions: Actions = {
 		const { request, fetch } = event;
 		const formData = Object.fromEntries(await request.formData());
 
-		const res = await fetch(`/api/hr/position/${formData.id}`, { method: 'DELETE' });
+		const res = await fetch(`/api/setting/position/${formData.id}`, { method: 'DELETE' });
 		const data = await res.json();
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
 		console.log(data.employee);
@@ -130,7 +130,7 @@ export const actions: Actions = {
 			return fail(400, { name: 'payment', warning: true, warnings });
 		}
 
-		const res = await fetch('/api/hr/payment', {
+		const res = await fetch('/api/setting/payment', {
 			method: 'POST',
 			body: JSON.stringify(payment.data)
 		});
@@ -164,7 +164,7 @@ export const actions: Actions = {
 			return fail(400, { name: 'payment', warning: true, warnings });
 		}
 
-		const res = await fetch(`/api/hr/payment/${formData.id}`, {
+		const res = await fetch(`/api/setting/payment/${formData.id}`, {
 			method: 'PUT',
 			body: JSON.stringify(payment.data)
 		});
@@ -182,7 +182,7 @@ export const actions: Actions = {
 		const { request, fetch } = event;
 		const formData = Object.fromEntries(await request.formData());
 
-		const res = await fetch(`/api/hr/payment/${formData.id}`, { method: 'DELETE' });
+		const res = await fetch(`/api/setting/payment/${formData.id}`, { method: 'DELETE' });
 		const data = await res.json();
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
 		console.log(data.employee);
@@ -209,7 +209,7 @@ export const actions: Actions = {
 			return fail(400, { name: 'team', warning: true, warnings });
 		}
 
-		const res = await fetch('/api/hr/team', {
+		const res = await fetch('/api/setting/team', {
 			method: 'POST',
 			body: JSON.stringify(team.data)
 		});
@@ -236,7 +236,7 @@ export const actions: Actions = {
 			return fail(400, { name: 'team', warning: true, warnings });
 		}
 
-		const res = await fetch(`/api/hr/team/${formData.id}`, {
+		const res = await fetch(`/api/setting/team/${formData.id}`, {
 			method: 'PUT',
 			body: JSON.stringify(team.data)
 		});
@@ -252,7 +252,7 @@ export const actions: Actions = {
 		const { request, fetch } = event;
 		const formData = Object.fromEntries(await request.formData());
 
-		const res = await fetch(`/api/hr/team/${formData.id}`, { method: 'DELETE' });
+		const res = await fetch(`/api/setting/team/${formData.id}`, { method: 'DELETE' });
 		const data = await res.json();
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
 		console.log(data.employee);
@@ -276,7 +276,7 @@ export const actions: Actions = {
 		}
 		console.log(role.data);
 
-		const res = await fetch('/api/hr/role', {
+		const res = await fetch('/api/setting/role', {
 			method: 'POST',
 			body: JSON.stringify(role.data)
 		});
@@ -303,7 +303,7 @@ export const actions: Actions = {
 			return fail(400, { name: 'role', warning: true, warnings });
 		}
 
-		const res = await fetch(`/api/hr/role/${formData.id}`, {
+		const res = await fetch(`/api/setting/role/${formData.id}`, {
 			method: 'PUT',
 			body: JSON.stringify(role.data)
 		});
@@ -319,7 +319,7 @@ export const actions: Actions = {
 		const { request, fetch } = event;
 		const formData = Object.fromEntries(await request.formData());
 
-		const res = await fetch(`/api/hr/role/${formData.id}`, { method: 'DELETE' });
+		const res = await fetch(`/api/setting/role/${formData.id}`, { method: 'DELETE' });
 		const data = await res.json();
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
 		console.log(data.employee);

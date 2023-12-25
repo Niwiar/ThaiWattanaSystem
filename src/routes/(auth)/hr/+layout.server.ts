@@ -16,11 +16,11 @@ export const load: LayoutServerLoad = async ({
 	}
 	const employeeRes = await fetch('/api/hr/employee?dataField=full');
 	const employee = await employeeRes.json();
-	const positionRes = await fetch('/api/hr/position?dataField=dropdown');
+	const positionRes = await fetch('/api/setting/position?dataField=dropdown');
 	const position = await positionRes.json();
-	const teamRes = await fetch('/api/hr/team?dataField=dropdown');
+	const teamRes = await fetch('/api/setting/team?dataField=dropdown');
 	const team = await teamRes.json();
-	const roleRes = await fetch('/api/hr/role?dataField=dropdown');
+	const roleRes = await fetch('/api/setting/role?dataField=dropdown');
 	const role = await roleRes.json();
 
 	return {

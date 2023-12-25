@@ -1,18 +1,78 @@
 <script lang="ts">
+	import { toastError } from '$src/lib/action/toast.action.js';
 	import AttnCalendar from '$src/lib/components/calendar/AttnCalendar.svelte';
+	import { pvDiffDate, pvGetDate, pvGetDayOfWeek, pvGetTime } from '$src/lib/datetime.js';
 	import type { Holiday } from '@prisma/client';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import type { EventInput } from 'svelte-fullcalendar';
+	import AttendanceTable from './AttendanceTable.svelte';
+	import type { EmployeeAttendanceList } from '$src/lib/types/hr';
+
+	const toastStore = getToastStore();
 
 	export let data;
 	let render = 0;
 
 	// Employee
-	let employee: any = {};
+	let employeeSource: EmployeeAttendanceList[] = [];
 	// Attendance
 	let date: string;
+	let summaryDate: string = pvGetDate(new Date());
 	let attendances: EventInput[] = [];
 	let holidays: EventInput[] = [];
 	let events: EventInput[] = [];
+
+	let monthData: any;
+	let dateCache: string[] = [];
+
+	const dataFetch = async (url: string) => {
+		const res = await fetch(url);
+		const result = await res.json();
+		if (res.status != 200) toastError(toastStore, result.message);
+		return res.status == 200 ? result.data : null;
+	};
+
+	const handleDay = (date: string, e: UIEvent) => (summaryDate = pvGetDate(new Date(date)));
+
+	const getSummary = async (date: string) => {
+		if (!date) return;
+		// attendances = [];
+		monthData = await dataFetch(`/api/dashboard/attendance/${date}`);
+		// const attn = new Array(data.max);
+		for (let i = 1; i <= monthData.max; i++) {
+			const day = `${date}-${i.toString().padStart(2, '0')}`;
+			const attn: { [key: string]: number } = { present: 0, absent: 0, late: 0, leave: 0 };
+			// if (pvGetDayOfWeek(day) === 0 || pvGetDayOfWeek(day) === 6) continue;
+			monthData.attendances.forEach((a: any) => {
+				a.attendance.forEach((at: any) => {
+					if (pvGetDate(new Date(at.date)) == day) attn[at.type as string] += 1;
+				});
+				a.leave.forEach((l: any) => {
+					if (pvGetDate(new Date(l.date)) == day) {
+						attn['leave'] += 1;
+					}
+				});
+			});
+			attendances.push({
+				date: day,
+				title: `เข้างาน ${attn.present} / สาย ${attn.late}`,
+				allDay: true,
+				backgroundColor: '#3788d8',
+				textColor: '#fbfdfd'
+			});
+			attendances.push({
+				date: day,
+				title: `ขาด ${attn.absent} / ลา ${attn.leave}`,
+				allDay: true,
+				backgroundColor: '#f77b72',
+				textColor: '#fbfdfd'
+			});
+		}
+		events = [...holidays, ...attendances];
+		render++;
+	};
 
 	$: if (data.holidays) {
 		holidays = data.holidays.map((holiday: Holiday) => ({
@@ -20,16 +80,63 @@
 			date: holiday.date,
 			allDay: true
 		}));
+		events = [...attendances, ...holidays];
 	}
-	$: events = [...attendances, ...holidays];
-	// $: render++;
+
+	$: if (browser) {
+		if (!dateCache.find((d) => d === date)) {
+			dateCache.push(date);
+			getSummary(date);
+		}
+	}
+
+	$: if (summaryDate && monthData) {
+		employeeSource = monthData.attendances.map((a: any) => {
+			const attend = a.attendance.find((at: any) => pvGetDate(new Date(at.date)) === summaryDate);
+			const leave = a.leave.find((at: any) => pvGetDate(new Date(at.date)) === summaryDate);
+			// let checkInTime = attend?._min && new Date(attend._min.createdAt.replaceAll(/Z|T/g, ' '));
+			// checkInTime.setHours(checkInTime.getHours() + 7);
+			// console.log(checkInTime);
+			return {
+				name: a.employee.name,
+				imageFile: a.employee.imageFile,
+				attendance: attend
+					? attend.type === 'present'
+						? `เข้างาน`
+						: attend.type === 'late'
+						? `สาย`
+						: attend.type === 'absent'
+						? 'ขาดงาน'
+						: '-'
+					: leave
+					? leave.type === 1
+						? 'ลากิจ'
+						: 'ลาป่วย'
+					: '-'
+			};
+		});
+		console.log(employeeSource);
+	}
 </script>
 
-<div class=" grid grid-cols-1 lg:grid-cols-2 m-6">
-	<div class="card h-max">
-		<AttnCalendar bind:date bind:events />
-		<!-- {#key render}
-			{/key} -->
+<div class=" grid grid-cols-1 lg:grid-cols-2 m-6 gap-4">
+	<div class="card h-[520px]">
+		{#key render}
+			<AttnCalendar bind:date bind:events height="h-[40rem]" {handleDay} />
+		{/key}
 	</div>
-	<div class="card" />
+	<div class="h-max space-y-2">
+		<div class="flex justify-between items-center">
+			<span class="text-2xl">Employee Attendance</span>
+			<input
+				class="input rounded-md px-2 py-1 w-52 variant-soft-tertiary text-xl text-center"
+				type="date"
+				disabled
+				bind:value={summaryDate}
+			/>
+		</div>
+		<div class="card">
+			<AttendanceTable {employeeSource} />
+		</div>
+	</div>
 </div>

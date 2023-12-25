@@ -3,46 +3,262 @@
 	import ModalFormBase from '$component/base/ModalFormBase.svelte';
 	import { enhance } from '$app/forms';
 	import PayTypeOptions from '$src/lib/components/base/PayTypeOptions.svelte';
-	import type { RoleList } from '$src/lib/types/hr';
+	import type { BillingList } from '$src/lib/types/hr';
+	import BillingBox from './BillingBox.svelte';
+	import { onMount } from 'svelte';
+	import SalaryBox from './SalaryBox.svelte';
 
 	// Props
 	export let parent: any;
 	export let formData: any = {};
 	export let size: string = '';
 
+	let incomeTotal: number = 0;
+	let deductionTotal: number = 0;
+
 	let isDisabled: boolean = false;
-	let roleList: any = $page.data.roles;
 
-	$: if (formData.teamId) {
-		fetchRole(formData.teamId);
-	}
+	let otSrc: BillingList[] = [];
+	let allowanceSrc: BillingList[] = [];
+	let welfareSrc: BillingList[] = [];
+	let deductionSrc: BillingList[] = [];
+	let businessLeave: any[] = [];
+	let sickLeave: any[] = [];
+	let atWork: any[] = [];
+	let absent: any[] = [];
 
-	const fetchRole = async (teamId: number) => {
-		const roleRes = await fetch(`/api/hr/team/${teamId}/role?dataField=dropdown`);
-		const roles = await roleRes.json();
-		console.log(roles.data);
-		roleList = roleRes.status == 200 ? (roles.data as RoleList[]) : [];
-	};
+	onMount(() => {
+		console.log(formData);
+		if (formData.infomation.billing?.employeePayment) {
+			otSrc =
+				formData.infomation.billing.employeePayment.filter((pay: BillingList) => pay.type === 1) ||
+				[];
+			allowanceSrc =
+				formData.infomation.billing.employeePayment.filter((pay: BillingList) => pay.type === 2) ||
+				[];
+			welfareSrc =
+				formData.infomation.billing.employeePayment.filter((pay: BillingList) => pay.type === 3) ||
+				[];
+			deductionSrc =
+				formData.infomation.billing.employeePayment.filter((pay: BillingList) => pay.type === 4) ||
+				[];
+		}
+		if (formData.infomation.leave.length > 0) {
+			businessLeave = formData.infomation.leave.filter((l: any) => l.type === 1);
+			sickLeave = formData.infomation.leave.filter((l: any) => l.type === 2);
+		}
+		if (formData.infomation.billing) {
+			incomeTotal = formData.infomation.billing.income;
+			deductionTotal = formData.infomation.billing.deduction;
+		}
+		if (formData.infomation.attendance.length > 0) {
+			atWork = formData.infomation.attendance.filter((a: any) => a.type !== 'absent');
+			absent = formData.infomation.attendance.filter((a: any) => a.type === 'absent');
+		}
+	});
 </script>
 
 <ModalFormBase {parent} {size}>
-	<input bind:value={formData.id} name="id" hidden />
-	<div class="grid grid-cols-2 gap-4">
+	<input bind:value={formData.infomation.billing.id} name="id" hidden />
+	<div class="grid grid-cols-1 lg:grid-cols-2 gap-2 text-md">
 		<label class="flex items-center" for="name">
 			<span class="w-40 font-semibold text-surface-900 text-lg">ชื่อพนักงาน Name:</span>
-			<span>{formData.name}</span>
+			<input
+				name="name"
+				type="text"
+				class="input w-60 !text-tertiary-500"
+				disabled
+				value={formData.name}
+			/>
+			<!-- <span>{formData.name}</span> -->
 		</label>
-		<label class="flex items-center" for="name">
+		<label class="flex items-center" for="position">
 			<span class="w-40 font-semibold text-surface-900 text-lg">แผนก/ฝ่าย Dept.:</span>
-			<span>{formData.position.name}</span>
+			<input
+				name="position"
+				type="text"
+				class="input w-60 !text-tertiary-500"
+				disabled
+				value={formData.position.name}
+			/>
+			<!-- <span>{formData.position.name}</span> -->
 		</label>
 	</div>
-	<div class="grid grid-cols-2 gap-4">
+	<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-md">
 		<div class="flex flex-col">
-			<span class="font-bold text-surface-900 text-xl">รายได้ Income</span>
+			<span class="font-bold text-surface-900 text-md">รายได้ Income</span>
+
+			<SalaryBox
+				name="salary"
+				payment={{
+					name: 'อัตราเงินเดือน',
+					amount: formData.infomation.billing?.salary || 0,
+					payType: formData.payType,
+					salary: formData.salary,
+					period: 1
+				}}
+				hidePeriod={true}
+				isDisabled={formData.isDisabled}
+			/>
+			<BillingBox
+				name="attendance"
+				payment={{
+					name: 'วันทำงาน',
+					period: atWork.length,
+					payType: 2
+				}}
+				hideAmount={true}
+				hideTotal={true}
+			/>
+			{#each otSrc as pay}
+				<BillingBox
+					name="ot{pay.id}"
+					payment={{
+						name: pay.payment.name,
+						amount: pay.amount,
+						payType: pay.payType,
+						period: pay.period,
+						total: pay.total
+					}}
+					isDisabled={formData.isDisabled}
+				/>
+			{/each}
+			{#each allowanceSrc as pay}
+				<BillingBox
+					name="allowance{pay.id}"
+					payment={{
+						name: pay.payment.name,
+						amount: pay.amount,
+						payType: pay.payType,
+						period: pay.period,
+						total: pay.total
+					}}
+					isDisabled={formData.isDisabled}
+				/>
+			{/each}
+			{#each welfareSrc as pay}
+				<BillingBox
+					name="welfare{pay.id}"
+					payment={{
+						name: pay.payment.name,
+						amount: pay.amount,
+						payType: pay.payType,
+						period: pay.period,
+						total: pay.total
+					}}
+					isDisabled={formData.isDisabled}
+				/>
+			{/each}
 		</div>
 		<div class="flex flex-col">
-			<span class="font-bold text-surface-900 text-xl">รายการหัก Deduction</span>
+			<span class="font-bold text-surface-900 text-md">รายการหัก Deduction</span>
+			<BillingBox
+				name="sickLeave"
+				payment={{
+					name: 'ลาป่วย',
+					period: sickLeave.length,
+					payType: 2
+				}}
+				hideAmount={true}
+				hideTotal={true}
+			/>
+			<BillingBox
+				name="businessLeave"
+				payment={{
+					name: 'ลากิจ',
+					period: businessLeave.length,
+					payType: 2
+				}}
+				hideAmount={true}
+				hideTotal={true}
+			/>
+			<BillingBox
+				name="absent"
+				payment={{
+					name: 'ขาดงาน',
+					period: absent.length,
+					payType: 2
+				}}
+				hideAmount={true}
+				hideTotal={true}
+			/>
+			<BillingBox
+				name="tax3"
+				payment={{
+					name: 'หัก ณ ที่จ่าย 3%',
+					amount: formData.infomation.billing?.tax3 || 0,
+					period: 1,
+					payType: 3
+				}}
+			/>
+			{#each deductionSrc as pay}
+				<BillingBox
+					name="deduction{pay.id}"
+					payment={{
+						name: pay.payment.name,
+						amount: pay.amount,
+						payType: pay.payType,
+						period: pay.period,
+						total: pay.total
+					}}
+					hidePeriod={true}
+					isDisabled={formData.isDisabled}
+				/>
+			{/each}
 		</div>
+	</div>
+	<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-md">
+		<div class="flex flex-col">
+			<hr class="!border-t-2" />
+			<div class="flex justify-between items-center">
+				<h6 class="h6">รวมรายได้ (Total Income)</h6>
+				<input
+					class="input rounded-md px-2 py-1 w-20"
+					type="number"
+					name="income"
+					bind:value={incomeTotal}
+					disabled={true}
+				/>
+			</div>
+		</div>
+		<div class="flex flex-col">
+			<hr class="!border-t-2" />
+			<div class="flex justify-between items-center">
+				<h6 class="h6">รวมรายการหัก (Total Deduction)</h6>
+				<input
+					class="input rounded-md px-2 py-1 w-20"
+					type="number"
+					name="deduction"
+					bind:value={deductionTotal}
+					disabled={true}
+				/>
+			</div>
+		</div>
+	</div>
+	<hr class="!border-t-2" />
+	<div
+		class="flex flex-col justify-center ltems-end lg:flex-row lg:justify-end lg:items-center gap-4 text-sm"
+	>
+		<label class="flex flex-row justify-between lg:justify-end items-center gap-2" for="payDate">
+			<span class="w-20">วันที่จ่าย</span>
+			<input
+				bind:value={formData.payDate}
+				class="input variant-filled-surface rounded-md px-2 py-1 max-w-[12rem]"
+				type="date"
+				name="payDate"
+				disabled={formData.isDisabled}
+			/>
+		</label>
+		<label class="flex flex-row justify-between lg:justify-end items-center gap-2" for="summary">
+			<span class="w-36">สรุปเงินเดือน (Salary)</span>
+			<input
+				value={formData.infomation.billing?.summary || 0}
+				class="input variant-filled-surface rounded-md px-2 py-1 max-w-[12rem]"
+				type="number"
+				name="summary"
+				placeholder="Summary"
+				disabled={true}
+			/>
+		</label>
 	</div>
 </ModalFormBase>

@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
+		"dev-host": "vite dev --host 192.0.0.51",
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -49,10 +50,14 @@
 		"@fortawesome/fontawesome-free": "^6.4.2",
 		"@originjs/vite-plugin-commonjs": "^1.0.3",
 		"@prisma/client": "^5.2.0",
+		"@types/pdfmake": "^0.2.8",
 		"bcrypt": "^5.1.1",
 		"chart.js": "^4.4.0",
+		"cloudinary": "^1.41.0",
 		"jsonwebtoken": "^9.0.1",
 		"node-rtsp-stream": "^0.0.9",
+		"pdfmake": "^0.2.8",
+		"svelte-pdf": "^1.0.20",
 		"zod": "^3.22.2"
 	}
 }

@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -87,7 +88,7 @@ model Payment {
 }
 
 model Employee {
-  id                 BigInt               @id @default(autoincrement())
+  id                 Int                  @id @default(autoincrement())
   name               String
   employeeCode       String               @unique
   salary             Float
@@ -107,6 +108,9 @@ model Employee {
   imageFile          String?
   workPermitFile     String?
   active             Boolean              @default(true)
+  bankName           String?
+  bankAccountNo      String?
+  bankAccountHolder  String?
   teamId             Int?
   roleId             Int?
   positionId         Int?
@@ -122,22 +126,24 @@ model Employee {
 
 model EmployeeAttendance {
   id         BigInt   @id @default(autoincrement())
-  employeeId BigInt
+  employeeId Int
   createdBy  Int?
+  date       DateTime @default(now()) @db.Date
   createdAt  DateTime @default(now())
-  user       User?    @relation(fields: [createdBy], references: [id])
-  employee   Employee @relation(fields: [employeeId], references: [id])
+  imageFile  String?
+
+  user     User?    @relation(fields: [createdBy], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
 
   @@map("employeeAttendance")
 }
 
 model EmployeeLeave {
   id         BigInt   @id @default(autoincrement())
-  employeeId BigInt
-  leaveType  Int // 1 Late, 2 Absent, 3 Business, 4 Sick
+  employeeId Int
+  type       Int // 1 Business, 2 Sick
   date       DateTime
   period     Int? // 1 Allday, 2 Morning, 3 Noon
-  time       Int? // Minute
   createdAt  DateTime @default(now())
   createdBy  Int?
   user       User?    @relation(fields: [createdBy], references: [id])
@@ -151,6 +157,7 @@ model EmployeePayment {
   billingId BigInt
   paymentId Int
   date      DateTime @db.Date
+  type      Int // 1 OT, 2 Allowance, 3 Welfare, 4 Deduction
   amount    Float
   payType   Int // 0 Hourly, 1 Daily, 2 Monthly
   period    Float // Time in Hour/Day/Month Unit
@@ -166,11 +173,11 @@ model EmployeePayment {
 model Billing {
   id              BigInt            @id @default(autoincrement())
   month           String
-  employeeId      BigInt
+  employeeId      Int
   payDate         DateTime?         @db.Date
-  amount          Float?
-  tax3            Float?
-  summary         Float?
+  salary          Float?
+  income          Float?
+  deduction       Float?
   employeePayment EmployeePayment[]
   employee        Employee          @relation(fields: [employeeId], references: [id])
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { FILE_LOCATION } from '$src/constant';
+	import { EMPLOYEE_LOCATION } from '$src/constant';
 	import ModalFormBase from '$component/base/ModalFormBase.svelte';
 	import ImageInputPreview from '$component/base/ImageInput.svelte';
 	import AvatarInput from '$component/base/AvatarInput.svelte';
@@ -19,15 +19,18 @@
 
 	let isDisabled: boolean = false;
 	let roleList: any = $page.data.roles;
+	let lastTeamId: any = null;
 
 	$: if (formData.teamId) {
-		fetchRole(formData.teamId);
+		if (lastTeamId != formData.teamId) {
+			lastTeamId = formData.teamId;
+			fetchRole(formData.teamId);
+		}
 	}
 
 	const fetchRole = async (teamId: number) => {
-		const roleRes = await fetch(`/api/hr/team/${teamId}/role?dataField=dropdown`);
+		const roleRes = await fetch(`/api/setting/team/${teamId}/role?dataField=dropdown`);
 		const roles = await roleRes.json();
-		console.log(roles.data);
 		roleList = roleRes.status == 200 ? (roles.data as RoleList[]) : [];
 	};
 </script>
@@ -41,7 +44,7 @@
 				: formData.name
 				? formData.name[0] + (formData.name[1] || '')
 				: ''}
-			src={formData.imageFile ? FILE_LOCATION + formData.imageFile : ''}
+			src={formData.imageFile ? EMPLOYEE_LOCATION + formData.imageFile : ''}
 			width="w-48 lg:w-72"
 		/>
 		<div class="flex flex-col space-y-2">
@@ -64,7 +67,7 @@
 					<!-- <span class="w-20">ชื่อ</span> -->
 					<input
 						bind:value={formData.name}
-						class="input variant-filled-surface variant-filled-surface rounded-md px-2 py-1 max-w-[24rem]"
+						class="input variant-filled-surface rounded-md px-2 py-1 max-w-[24rem]"
 						type="text"
 						name="name"
 						placeholder="Name"
@@ -323,23 +326,66 @@
 		</label>
 	</div>
 	<ImageInputPreview
-		src={formData.citizenCardFile ? FILE_LOCATION + formData.citizenCardFile : ''}
+		src={formData.citizenCardFile ? EMPLOYEE_LOCATION + formData.citizenCardFile : ''}
 		label="บัตรประจำตัวประชาชน"
 		name="citizenCardFile"
 		title="Citizen Card"
 	/>
 	<ImageInputPreview
-		src={formData.jobApplicationFile ? FILE_LOCATION + formData.jobApplicationFile : ''}
+		src={formData.jobApplicationFile ? EMPLOYEE_LOCATION + formData.jobApplicationFile : ''}
 		label="ใบสมัครงาน"
 		name="jobApplicationFile"
 		title="Job Application"
 	/>
 	<ImageInputPreview
-		src={formData.workPermitFile ? FILE_LOCATION + formData.workPermitFile : ''}
+		src={formData.workPermitFile ? EMPLOYEE_LOCATION + formData.workPermitFile : ''}
 		label="ใบอนุญาติทำงาน"
 		name="workPermitFile"
 		title="Work Permit"
 	/>
+	<div class="grid grid-cols-2">
+		<label for="bankName" class="flex justify-start items-center w-full">
+			<span class="w-20">ธนาคาร</span>
+			<div class="flex flex-col">
+				<input
+					bind:value={formData.bankName}
+					type="text"
+					class="input variant-filled-surface rounded-md px-2 py-1"
+					name="bankName"
+					placeholder="Bank Name"
+					disabled={isDisabled}
+				/>
+			</div>
+		</label>
+	</div>
+	<div class="grid grid-cols-2">
+		<label for="bankAccountNo" class="flex justify-start items-center w-full">
+			<span class="w-20">เลขบัญชี</span>
+			<div class="flex flex-col">
+				<input
+					bind:value={formData.bankAccountNo}
+					class="input variant-filled-surface rounded-md px-2 py-1"
+					type="text"
+					name="bankAccountNo"
+					placeholder="Bank Account No"
+					disabled={isDisabled}
+				/>
+			</div>
+		</label>
+		<label for="bankAccountHolder" class="flex justify-start items-center w-full">
+			<span class="w-20">ชื่อบัญชี</span>
+			<div class="flex flex-col">
+				<input
+					bind:value={formData.bankAccountHolder}
+					class="input variant-filled-surface rounded-md px-2 py-1"
+					type="text"
+					name="bankAccountHolder"
+					placeholder="Account Holder"
+					disabled={isDisabled}
+				/>
+			</div>
+		</label>
+	</div>
 	<div class="flex justify-start items-center">
 		{#if formData.id}
 			<form

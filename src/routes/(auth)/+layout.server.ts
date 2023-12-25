@@ -20,7 +20,7 @@ export const load: LayoutServerLoad = async ({ locals, url, fetch }: LayoutServe
 	// console.log(holidays.data);
 	return {
 		user: locals.user,
-		setting: dataFetch('/api/setting'),
-		holidays: dataFetch('/api/holiday')
+		setting: await dataFetch('/api/setting'),
+		holidays: await dataFetch('/api/holiday')
 	};
 };

@@ -10,7 +10,7 @@
 	import RowCount from '$src/lib/components/datatable/RowCount.svelte';
 	import Pagination from '$src/lib/components/datatable/Pagination.svelte';
 	import ThFilter from '$src/lib/components/datatable/ThFilter.svelte';
-	import { FILE_LOCATION } from '$src/constant';
+	import { EMPLOYEE_LOCATION } from '$src/constant';
 	import { handleModal } from '$src/lib/action';
 
 	export let employeeSource: EmployeeList[] = [];
@@ -80,7 +80,7 @@
 						><Avatar
 							initials={row.name[0] + (row.name[1] || '')}
 							width="w-12"
-							src={row.imageFile ? FILE_LOCATION + row.imageFile : ''}
+							src={row.imageFile ? EMPLOYEE_LOCATION + row.imageFile : ''}
 							alt="{row.name}-avatar"
 						/></td
 					>

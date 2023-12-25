@@ -2,25 +2,33 @@
 	import { page } from '$app/stores';
 	import ModalFormBase from '$component/base/ModalFormBase.svelte';
 	import AlertText from '$src/lib/components/AlertText.svelte';
+	import PayTypeOptions from '$src/lib/components/base/PayTypeOptions.svelte';
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 
 	// Props
 	export let parent: any;
 	export let formData: any = {};
 
-	let issueType: string = '1'; // 1 Leave, 2 Payment
-	let paymentType: string = '1'; // 1 OT, 2 Allowance, 3 Welfare, 4 Deduction
-	let leaveType: string = '3';
+	let issueType: string = '1'; // 1 Leave, 2 OT
+	let otId: string = '';
+	let type: string = '1';
 	let period: string = '1';
+	let ot: any = {};
+
+	$: if (otId) {
+		ot = $page.data.ot.find((o: any) => o.id === otId);
+	}
+	$: console.log(formData);
 </script>
 
 <ModalFormBase {parent}>
 	<input bind:value={formData.id} name="id" hidden />
+	<input bind:value={formData.infomation.billing.id} name="billingId" hidden />
 	<label class="flex justify-start items-center w-full">
 		<span class="w-16">Issue</span>
-		<select bind:value={issueType} class="select w-64 rounded-md px-2 py-1">
+		<select bind:value={issueType} name="issueType" class="select w-64 rounded-md px-2 py-1">
 			<option value="1">แจ้งลางาน</option>
-			<option value="2">ลงรายการเงินได้/รายการหัก</option>
+			<option value="2">แจ้งทำงานล่วงเวลา</option>
 		</select>
 	</label>
 	<label for="date" class="flex justify-start items-center w-full">
@@ -31,7 +39,7 @@
 		</div>
 	</label>
 	{#if issueType === '1'}
-		<label for="leaveType" class="flex justify-start items-center w-full">
+		<label for="type" class="flex justify-start items-center w-full">
 			<span class="w-16">Type</span>
 			<div class="flex flex-col">
 				<RadioGroup
@@ -39,14 +47,14 @@
 					active="variant-filled-tertiary"
 					hover="hover:variant-soft-tertiary"
 				>
-					<RadioItem bind:group={leaveType} name="leaveType" value="3">
+					<RadioItem bind:group={type} name="type" value="1">
 						<i class="fa fa-briefcase" /> ลากิจ
 					</RadioItem>
-					<RadioItem bind:group={leaveType} name="leaveType" value="4">
+					<RadioItem bind:group={type} name="type" value="2">
 						<i class="fa fa-heart-pulse" /> ลาป่วย
 					</RadioItem>
 				</RadioGroup>
-				<AlertText alerts={$page.form} form="attendance" field="leaveType" />
+				<AlertText alerts={$page.form} form="attendance" field="type" />
 			</div>
 		</label>
 		<label for="period" class="flex justify-start items-center w-full">
@@ -67,12 +75,36 @@
 	{:else if issueType === '2'}
 		<label class="flex justify-start items-center w-full">
 			<span class="w-16">Type</span>
-			<select bind:value={paymentType} class="select w-64 rounded-md px-2 py-1">
-				<option value="1">ทำงานล่วงเวลา</option>
-				<option value="2">เบี้ยเลี้ยง / เบี้ยขยัน</option>
-				<option value="3">สวัสดิการ</option>
-				<option value="4">รายการหัก</option>
-			</select>
+			<div class="flex flex-col">
+				<select bind:value={otId} name="otId" class="select w-64 rounded-md px-2 py-1">
+					<option value="">เลือกประเภท O.T.</option>
+					{#each $page.data.ot as ot}
+						<option value={ot.id}>{ot.name}</option>
+					{/each}
+				</select>
+				<AlertText alerts={$page.form} form="attendance" field="otId" />
+			</div>
+		</label>
+		<label class="flex justify-start items-center w-full">
+			<span class="w-16">Amount</span>
+			<div class="flex flex-row">
+				<input
+					value={ot.amount}
+					type="number"
+					class="input rounded-md px-2 py-1 w-16"
+					name="amount"
+				/>
+				<select class="select rounded-md px-2 py-1" bind:value={ot.payType} name="payType">
+					<PayTypeOptions />
+				</select>
+			</div>
+		</label>
+		<label class="flex justify-start items-center w-full">
+			<span class="w-16">Time (min)</span>
+			<div class="flex flex-col">
+				<input type="number" class="input rounded-md px-2 py-1" name="time" />
+				<AlertText alerts={$page.form} form="attendance" field="time" />
+			</div>
 		</label>
 	{/if}
 </ModalFormBase>

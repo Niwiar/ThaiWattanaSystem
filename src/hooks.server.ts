@@ -1,14 +1,13 @@
 import type { Handle, HandleFetch, HandleServerError } from '@sveltejs/kit';
-import { error, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { verifyAuth } from '$lib/server/jwt';
 import type { UserInfo } from './app';
 
 export const handle: Handle = async ({ event, resolve }) => {
+	if (event.url.pathname.startsWith('/api/access')) return await resolve(event);
 	if (event.url.pathname.startsWith('/api/auth')) {
 		const response = await resolve(event);
-		console.log(event.url.pathname);
 		if (event.url.pathname.endsWith('/logout')) event.locals.user = null;
-		console.log('logout', event.locals.user);
 		return response;
 	}
 	if (event.url.pathname.startsWith('/api/') && event.request.method === 'GET') {
@@ -18,10 +17,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// console.log('check', event.url.pathname, event.locals.user);
 	if (event.url.pathname === '/') {
 		if (event.locals.user) {
-			console.log('dashboard');
 			throw redirect(302, '/dashboard');
 		}
-		console.log('login');
 		return resolve(event);
 	}
 	if (!event.locals.user) {
@@ -45,7 +42,7 @@ export const handleFetch: HandleFetch = async ({ event, fetch, request }) => {
 	return fetch(request);
 };
 
-export const handleError: HandleServerError = async ({ error, event }) => {
+export const handleError: HandleServerError = async ({ error }) => {
 	console.log(error);
 	return { message: error as string };
 };

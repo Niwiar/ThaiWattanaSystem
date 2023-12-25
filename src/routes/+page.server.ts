@@ -1,5 +1,5 @@
 import { redirect, fail } from '@sveltejs/kit';
-import type { Actions, RequestEvent } from './login/$types';
+import type { Actions, RequestEvent } from './$types';
 
 import { z } from 'zod';
 import { setRefreshToken, setToken } from '$server/jwt';

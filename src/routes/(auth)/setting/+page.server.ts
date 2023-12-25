@@ -1,14 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { fail } from '@sveltejs/kit';
 
-import type { Actions, PageServerLoad, RequestEvent } from './$types';
+import type { Actions, RequestEvent } from './$types';
 
 import { z } from 'zod';
 import { jsonSchema } from '$src/lib/schema';
-
-export const load: PageServerLoad = async ({ fetch }) => {
-	return {};
-};
 
 const settingSchema = z.object({
 	workday: jsonSchema,
@@ -77,7 +73,7 @@ export const actions: Actions = {
 				};
 			});
 			console.log(warnings);
-			return fail(400, { name: 'holiday', warning: true, warnings });
+			return fail(400, { type: 'holiday', warning: true, warnings });
 		}
 
 		const res = await fetch('/api/holiday', {
@@ -88,7 +84,7 @@ export const actions: Actions = {
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
 		console.log(data.employee);
 		return {
-			name: 'holiday',
+			type: 'holiday',
 			success: true,
 			message: `เพิ่มวันหยุด ${holiday.data.name} สำเร็จ`
 		};
@@ -105,7 +101,7 @@ export const actions: Actions = {
 				};
 			});
 			console.log(warnings);
-			return fail(400, { name: 'holiday', warning: true, warnings });
+			return fail(400, { type: 'holiday', warning: true, warnings });
 		}
 		const res = await fetch(`/api/holiday/${formData.id}`, {
 			method: 'PUT',
@@ -115,7 +111,7 @@ export const actions: Actions = {
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
 		console.log(data);
 		return {
-			name: 'holiday',
+			type: 'holiday',
 			success: true,
 			message: `แก้ไขวันหยุด ${holiday.data.name} สำเร็จ`
 		};
@@ -128,6 +124,6 @@ export const actions: Actions = {
 		const data = await res.json();
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
 		console.log(data.employee);
-		return { name: 'holiday', success: true, message: `ลบวันหยุดสำเร็จ` };
+		return { type: 'holiday', success: true, message: `ลบวันหยุดสำเร็จ` };
 	}
 };

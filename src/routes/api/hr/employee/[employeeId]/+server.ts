@@ -43,21 +43,20 @@ export const PUT: RequestHandler = async ({ request, params }: RequestEvent) => 
 	if (jobApplicationFileName) employeeData.jobApplicationFile = jobApplicationFileName;
 	if (workPermitFileName) employeeData.workPermitFile = workPermitFileName;
 
-	const employee = await db.employee.update({
+	await db.employee.update({
 		data: employeeData,
 		where: { id: parseInt(employeeId) }
 	});
-	console.log(employee);
 	return json({ message: 'ok' });
 };
 
 export const DELETE: RequestHandler = async ({ params }: RequestEvent) => {
 	const employeeId = params.employeeId;
 
-	// await db.employee.update({
-	// 	data: { active: false },
-	// 	where: { id: parseInt(employeeId) }
-	// });
+	await db.employee.update({
+		data: { active: false },
+		where: { id: parseInt(employeeId) }
+	});
 
 	// await db.employee.delete({
 	// 	where: { id: parseInt(employeeId) }

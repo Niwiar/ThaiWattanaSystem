@@ -20,6 +20,13 @@ export type EmployeeList = {
 	};
 };
 
+export type EmployeeAttendanceList = {
+	id: number;
+	imageFile: string;
+	name: string;
+	attendance: string;
+};
+
 export type PositionList = {
 	id: number;
 	name: string;
@@ -49,4 +56,24 @@ export type PaymentList = {
 	name: string;
 	amount: number;
 	payType: string;
+};
+
+export type BillingList = {
+	id: number;
+	type?: number;
+	payment: { name: string };
+	amount: number;
+	period: number;
+	total: number;
+	payType: string;
+};
+
+export type BillingPrintList = {
+	id: number;
+	type?: number;
+	payment: { name: string };
+	amount: number;
+	period: number;
+	total: number;
+	payType: number;
 };

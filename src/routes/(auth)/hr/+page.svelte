@@ -30,7 +30,7 @@
 
 <!-- <div class="container grid grid-cols-1 lg:grid-cols-[minmax(600px,_1fr)_auto] gap-4 my-6"> -->
 
-<div class=" grid grid-cols-1 lg:grid-cols-[minmax(500px,_1fr)_auto]">
+<div class=" grid grid-cols-1 lg:grid-cols-[minmax(300px,1fr)_auto]">
 	<div class="h-max space-y-2">
 		<div class="flex justify-between items-center">
 			<span class="text-2xl">Employee</span>

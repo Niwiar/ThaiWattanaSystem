@@ -48,7 +48,10 @@
 			date: holiday.date,
 			allDay: true,
 			editable: true,
-			id: holiday.id
+			id: holiday.id,
+			display: 'background',
+			backgroundColor: '#d3d4d8',
+			textColor: '#fbfdfd'
 		}));
 	}
 
