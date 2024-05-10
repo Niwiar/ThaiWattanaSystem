@@ -14,11 +14,19 @@
 	let type: string = '1';
 	let period: string = '1';
 	let ot: any = {};
+	let otList: any[] = [];
 
-	$: if (otId) {
-		ot = $page.data.ot.find((o: any) => o.id === otId);
+	
+	$: fetchEmployeeOt(formData.id)
+	const fetchEmployeeOt=async (employeeId:string)=>{
+		const paymentEmployeeRes = await fetch(`/api/hr/employee/${employeeId}/payment`);
+		const paymentEmployee = await paymentEmployeeRes.json();
+		otList = paymentEmployee.data.filter((pay: any) => pay.payment.type === 1)
+		
 	}
-	$: console.log(formData);
+	$: if (otId) {
+		ot = otList.find((o: any) => o.id === otId);
+	}
 </script>
 
 <ModalFormBase {parent}>
@@ -78,8 +86,8 @@
 			<div class="flex flex-col">
 				<select bind:value={otId} name="otId" class="select w-64 rounded-md px-2 py-1">
 					<option value="">เลือกประเภท O.T.</option>
-					{#each $page.data.ot as ot}
-						<option value={ot.id}>{ot.name}</option>
+					{#each otList as ot}
+						<option value={ot.id}>{ot.payment.name}</option>
 					{/each}
 				</select>
 				<AlertText alerts={$page.form} form="attendance" field="otId" />
@@ -94,7 +102,7 @@
 					class="input rounded-md px-2 py-1 w-16"
 					name="amount"
 				/>
-				<select class="select rounded-md px-2 py-1" bind:value={ot.payType} name="payType">
+				<select class="select rounded-md px-2 py-1" value={ot.payment?.payType} name="payType">
 					<PayTypeOptions />
 				</select>
 			</div>

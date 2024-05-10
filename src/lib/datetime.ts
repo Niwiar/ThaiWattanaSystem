@@ -9,6 +9,13 @@ export const pvGetDate = (date: Date) => {
 	return `${YYYY}-${MM}-${DD}`;
 };
 
+export const pvGetDateDMY = (date: Date) => {
+	const DD = date.toLocaleString('default', { day: '2-digit' });
+	const MM = date.toLocaleString('default', { month: '2-digit' });
+	const YYYY = date.getFullYear();
+	return `${DD}/${MM}/${YYYY}`;
+};
+
 export const pvGetMonth = (date: Date) => {
 	let MM: number | string = date.getMonth() + 1;
 	const YYYY = date.getFullYear();

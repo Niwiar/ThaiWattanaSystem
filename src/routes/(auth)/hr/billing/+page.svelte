@@ -11,7 +11,6 @@
 	export let form;
 
 	let month: string = pvGetMonth(new Date());
-	$: console.log(month);
 	$: {
 		if (form?.success) {
 			modalStore.close();

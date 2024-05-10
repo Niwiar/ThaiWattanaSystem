@@ -10,6 +10,48 @@ import { getAttendance, getBusinessDay, getLeave } from './attendance.controller
 import type { BillingPrintList } from '$src/lib/types/hr';
 import { number2CommaDecimal } from '$src/lib/utils';
 
+export const createBilling = (employeeId: string, month: string, employee: any, working: Working)=> 
+	new Promise(async (resolve)=>{
+		let billing = await db.billing.findFirst({
+			select: { id:true },
+			where: { employeeId: parseInt(employeeId), month: month }
+		});
+		if(billing) return resolve(billing.id)
+		billing = await db.billing.create({
+			data: {
+				employeeId: parseInt(employeeId),
+				salary: employee?.salary || 0,
+				month: month
+			},
+			select: { id:true },
+		});
+		const paymentEmployee = await db.paymentEmployee.findMany({
+			select: {
+				id: true,
+				amount: true,
+				payment: { select: { name: true, payType: true, type: true } }
+			},
+			where: {
+				employeeId: parseInt(employeeId),
+				active: true,
+				payment: { type: { in: [1, 2, 3, 4] } }
+			},
+			orderBy: { id: 'asc' }
+		});
+		await db.employeePayment.createMany({
+			data: paymentEmployee.map((p) => ({
+				billingId: billing?.id || 0,
+				paymentEmployeeId: p.id,
+				date: new Date(),
+				type: p.payment.type,
+				amount: p.amount,
+				payType: p.payment.payType,
+				period: p.payment.type === 1 ? 0 : 1
+			}))
+		});
+		resolve(billing.id)
+	})
+
 export const getBilling = (employeeId: string, month: string, employee: any, working: Working) =>
 	new Promise(async (resolve) => {
 		const monthType = pvIsFuture(new Date(month))
@@ -24,9 +66,18 @@ export const getBilling = (employeeId: string, month: string, employee: any, wor
 
 		const leave = await getLeave(employeeId, month);
 		let billing = await db.billing.findFirst({
-			include: { employeePayment: { include: { payment: { select: { name: true } } } } },
+			include: {
+				employeePayment: {
+					include: {
+						paymentEmployee: {
+							include: { payment: { select: { name: true, payType: true, type: true } } }
+						}
+					}
+				}
+			},
 			where: { employeeId: parseInt(employeeId), month: month }
 		});
+		// TODO: Fix Billing Generation
 		if (monthType === 'inRange' || monthType === 'start') {
 			businessDay = getBusinessDay(
 				month,
@@ -40,7 +91,6 @@ export const getBilling = (employeeId: string, month: string, employee: any, wor
 				monthType
 			);
 			attendance = await getAttendance(employeeId, month, working);
-			// console.log(attendance);
 			if (!billing) {
 				billing = await db.billing.create({
 					data: {
@@ -48,40 +98,61 @@ export const getBilling = (employeeId: string, month: string, employee: any, wor
 						salary: employee?.salary || 0,
 						month: month
 					},
-					include: { employeePayment: { include: { payment: { select: { name: true } } } } }
+					include: {
+						employeePayment: {
+							include: {
+								paymentEmployee: {
+									include: { payment: { select: { name: true, payType: true, type: true } } }
+								}
+							}
+						}
+					}
 				});
 			}
 			if (!billing.employeePayment.length) {
-				const payment = await db.payment.findMany({
-					select: { id: true, name: true, amount: true, payType: true, type: true },
-					where: { active: true, type: { in: [1, 2, 3, 4] } },
+				const paymentEmployee = await db.paymentEmployee.findMany({
+					select: {
+						id: true,
+						amount: true,
+						payment: { select: { name: true, payType: true, type: true } }
+					},
+					where: {
+						employeeId: parseInt(employeeId),
+						active: true,
+						payment: { type: { in: [1, 2, 3, 4] } }
+					},
 					orderBy: { id: 'asc' }
 				});
 				await db.employeePayment.createMany({
-					data: payment.map((p) => ({
+					data: paymentEmployee.map((p) => ({
 						billingId: billing?.id || 0,
-						paymentId: p.id,
+						paymentEmployeeId: p.id,
 						date: new Date(),
-						type: p.type,
+						type: p.payment.type,
 						amount: p.amount,
-						payType: p.payType,
-						period: p.type === 1 ? 0 : 1
+						payType: p.payment.payType,
+						period: p.payment.type === 1 ? 0 : 1
 					}))
 				});
 				billing = await db.billing.findFirst({
-					include: { employeePayment: { include: { payment: { select: { name: true } } } } },
+					include: {
+						employeePayment: {
+							include: { paymentEmployee: { include: { payment: true } } }
+						}
+					},
 					where: { employeeId: parseInt(employeeId), month: month }
 				});
 			}
+			// console.log(billing);
 
-			if (billing) {
+			if (billing && billing.employeePayment.length > 0) {
 				let employeePayment = null;
 				if (
 					billing.employeePayment.filter((p) => p.payType === 2)[0].period !== attendance.length
 				) {
 					await updatePaymentDaily(billing, attendance.length);
 					employeePayment = await db.employeePayment.findMany({
-						include: { payment: { select: { name: true } } },
+						include: { paymentEmployee: { include: { payment: { select: { name: true } } } } },
 						where: { billingId: billing.id }
 					});
 				}
@@ -91,7 +162,11 @@ export const getBilling = (employeeId: string, month: string, employee: any, wor
 				);
 				await updateBilling(parseInt(billing.id.toString()), { ...paymentSummary });
 				billing = await db.billing.findFirst({
-					include: { employeePayment: { include: { payment: { select: { name: true } } } } },
+					include: {
+						employeePayment: {
+							include: { paymentEmployee: { include: { payment: { select: { name: true } } } } }
+						}
+					},
 					where: { employeeId: parseInt(employeeId), month: month }
 				});
 			}
@@ -134,7 +209,11 @@ export const getBillingPrint = (
 
 		const leave = await getLeave(employeeId, month);
 		const billing = await db.billing.findFirst({
-			include: { employeePayment: { include: { payment: { select: { name: true } } } } },
+			include: {
+				employeePayment: {
+					include: { paymentEmployee: { include: { payment: { select: { name: true } } } } }
+				}
+			},
 			where: { employeeId: parseInt(employeeId), month: month }
 		});
 		if (monthType === 'inRange' || monthType === 'start') {
@@ -177,7 +256,7 @@ export const getBillingPrint = (
 		});
 	});
 export const getPaymentSummary = (
-	employeePayment: ({ payment: { name: string } } & EmployeePayment)[],
+	employeePayment: ({ paymentEmployee: { payment: { name: string } } } & EmployeePayment)[],
 	salary: number
 ) => {
 	const income =
@@ -189,7 +268,9 @@ export const getPaymentSummary = (
 };
 
 export const updatePaymentDaily = async (
-	billing: Billing & { employeePayment: ({ payment: { name: string } } & EmployeePayment)[] },
+	billing: Billing & {
+		employeePayment: ({ paymentEmployee: { payment: { name: string } } } & EmployeePayment)[];
+	},
 	period: number
 ) => {
 	const payment = billing.employeePayment.filter((p) => p.payType === 2);
@@ -305,24 +386,40 @@ const billingColumn = (data: any) => {
 		widths: ['*'],
 		body: [totalRow(' '), totalRow(' '), totalRow(' '), totalRow(number2CommaDecimal(billing.tax3))]
 	};
-	billing.employeePayment
+	const otPay = billing.employeePayment
 		.filter((p: BillingPrintList) => p.type === 1)
-		.forEach((p: BillingPrintList) => {
-			incomeTable.body.push(
-				payRow(
-					p.payment.name,
-					`${p.amount || '-'} ${amountUnit[p.payType]}`,
-					p.payType === 3 ? '' : `${p.period || '-'} ${periodUnit[p.payType]}`
-				)
-			);
-			incomeTotalTable.body.push(totalRow(p.total ? number2CommaDecimal(p.total) : '-'));
+		.reduce((r: any, a: any) => {
+			(r[a.paymentEmployee.payment.name] = r[a.paymentEmployee.payment.name] || []).push(a);
+
+			return r;
+		}, {});
+	// console.log(otPay);
+	let otSrc = [];
+	for (const [key, value] of Object.entries(otPay)) {
+		const pay = (value as any).reduce((r: any, a: any, i: number) => {
+			r.period = r.period + a.period;
+			return r;
 		});
+		pay.total = pay.amount * pay.period;
+		otSrc.push(pay);
+		// console.log(`${key}: ${value}`);
+	}
+	otSrc.forEach((p: BillingPrintList) => {
+		incomeTable.body.push(
+			payRow(
+				p.paymentEmployee.payment.name,
+				`${p.amount || '-'} ${amountUnit[p.payType]}`,
+				p.payType === 3 ? '' : `${p.period || '-'} ${periodUnit[p.payType]}`
+			)
+		);
+		incomeTotalTable.body.push(totalRow(p.total ? number2CommaDecimal(p.total) : '-'));
+	});
 	billing.employeePayment
 		.filter((p: BillingPrintList) => p.type === 2)
 		.forEach((p: BillingPrintList) => {
 			incomeTable.body.push(
 				payRow(
-					p.payment.name,
+					p.paymentEmployee.payment.name,
 					`${p.amount || '-'} ${amountUnit[p.payType]}`,
 					p.payType === 3 ? '' : `${p.period || '-'} ${periodUnit[p.payType]}`
 				)
@@ -334,7 +431,7 @@ const billingColumn = (data: any) => {
 		.forEach((p: BillingPrintList) => {
 			incomeTable.body.push(
 				payRow(
-					p.payment.name,
+					p.paymentEmployee.payment.name,
 					`${p.amount || '-'} ${amountUnit[p.payType]}`,
 					p.payType === 3 ? '' : `${p.period || '-'} ${periodUnit[p.payType]}`
 				)
@@ -346,7 +443,7 @@ const billingColumn = (data: any) => {
 		.forEach((p: BillingPrintList) => {
 			deductionTable.body.push(
 				payRow(
-					p.payment.name,
+					p.paymentEmployee.payment.name,
 					`${p.amount || '-'} ${amountUnit[p.payType]}`,
 					p.payType === 3 ? '' : `${p.period || '-'} ${periodUnit[p.payType]}`
 				)
@@ -389,7 +486,15 @@ const billingColumn = (data: any) => {
 const billingPage = (data: any, pageBreak: boolean) => {
 	const { employee, billing } = data;
 	const { name, position, bankName, bankAccountNo, bankAccountHolder } = employee;
-	if (!billing) return null;
+	if (!billing){
+		const page:Content=[
+			{text:`ไม่มีข้อมูลใบเสร็จ`,style:'thead',fontSize: 16,},
+			{text:`ชื่อพนักงาน: ${name}`,alignment:'center',fontSize: 14},
+			{text:`ตำแหน่ง: ${position.name||"-"}`,alignment:'center',fontSize: 14},
+		]
+		if (pageBreak) page.unshift({ text: '', pageBreak: 'before' });
+		return page;
+	}
 
 	const header: Column[] = [
 		{

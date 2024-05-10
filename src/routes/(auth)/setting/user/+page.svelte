@@ -103,7 +103,7 @@
 									name="username"
 									placeholder="Username"
 								/>
-								<AlertText alerts={$page.form} field="username" />
+								<AlertText form="user" alerts={$page.form} field="username" />
 							</div>
 						</label>
 						<label class="label gap-2 flex justify-start items-center" for="email">
@@ -116,7 +116,7 @@
 									name="email"
 									placeholder="Email"
 								/>
-								<AlertText alerts={$page.form} field="email" />
+								<AlertText form="user" alerts={$page.form} field="email" />
 							</div>
 						</label>
 						{#if !userData.id}
@@ -129,7 +129,7 @@
 										name="password"
 										placeholder="Password"
 									/>
-									<AlertText alerts={$page.form} field="password" />
+									<AlertText form="user" alerts={$page.form} field="password" />
 								</div>
 							</label>
 						{/if}

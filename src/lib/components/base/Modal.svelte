@@ -20,8 +20,6 @@
 	<div class={cBase}>
 		<button class={cButton} on:click={parent.onClose}>✕</button>
 		<header class={cHeader}>{$modalStore[0].title ?? '(empty)'}</header>
-		<div class={cBody}>
-			<slot />
-		</div>
+		<div class={cBody}><slot /></div>
 	</div>
 {/if}

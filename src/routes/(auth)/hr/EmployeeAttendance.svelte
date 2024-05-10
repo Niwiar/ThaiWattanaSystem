@@ -30,11 +30,20 @@
 	let businessLeave: any[] = [];
 	let sickLeave: any[] = [];
 	let absent: any[] = [];
+	let late: any[] = [];
+	let attend: any[] = [];
 
 	let businessLeaveCount: number = 0;
 	let sickLeaveCount: number = 0;
+	let otCount: number = 0;
+	let allowanceCount: number = 0;
+	let deligenceCount: number = 0;
+
+	let lastEmployee: number | null;
+	let lastYear: string | null;
 
 	let date: string;
+	let summaryType: string = 'month';
 	let infomation: any = {};
 	if ($page.data.holidays) {
 		holidays = $page.data.holidays.map((holiday: Holiday) => ({
@@ -43,39 +52,59 @@
 			allDay: true
 		}));
 		events = [...attendances, ...holidays];
-		// if (lastEvents.length !== events.length) {
-		// 	render++;
-		// 	lastEvents = events;
-		// }
 	}
 
 	$: {
+		resetInfo();
+		if (Object.keys(employee).length !== 0 && date) {
+			let year = date.split('-')[0];
+			if (summaryType === 'month') {
+				lastEmployee = null;
+				lastYear = null;
+				fetchBilling(employee.id, date, summaryType);
+			} else if (lastEmployee !== employee.id || lastYear === year) {
+				lastEmployee = employee.id;
+				lastYear = year;
+				fetchBilling(employee.id, date, summaryType);
+			}
+		}
+	}
+
+	const resetInfo = () => {
 		infomation = {};
 		attendances = [];
 		absent = [];
+		late = [];
+		attend = [];
 		businessLeave = [];
 		sickLeave = [];
 		businessLeaveCount = 0;
 		sickLeaveCount = 0;
-		if (Object.keys(employee).length !== 0 && date) {
-			fetchBilling(employee.id, date);
-		}
-	}
+		otCount = 0;
+		allowanceCount = 0;
+		deligenceCount = 0;
+	};
 
 	$: if (
 		$page.form?.success &&
 		$page.form?.name === 'attendance' &&
 		Object.keys(employee).length !== 0 &&
 		date
-	)
-		fetchBilling(employee.id, date);
+	) {
+		fetchBilling(employee.id, date, summaryType);
+	}
 
-	const fetchBilling = async (employeeId: number, month: string) => {
-		const billingRes = await fetch(`/api/hr/billing/${employeeId}/${month}`);
+	const fetchBilling = async (employeeId: number, month: string, summaryType: string = 'month') => {
+		resetInfo();
+		const billingRes = await fetch(
+			`/api/hr/billing/${employeeId}/${month}?summaryType=${summaryType}`
+		);
 		const billings = await billingRes.json();
 		infomation = billingRes.status == 200 ? billings.data : {};
-		console.log(infomation);
+		if (!infomation?.billing) return;
 		absent = infomation.attendance.filter((a: any) => a.type === 'absent');
+		late = infomation.attendance.filter((a: any) => a.type === 'late');
+		attend = infomation.attendance.filter((a: any) => a.type !== 'absent');
 		if (infomation.leave.length > 0) {
 			businessLeave = infomation.leave.filter((l: any) => l.type === 1);
 			sickLeave = infomation.leave.filter((l: any) => l.type === 2);
@@ -88,6 +117,16 @@
 				0
 			);
 		}
+		infomation.billing.employeePayment
+			.filter((p: any) => p.type === 1 && p.period != 0)
+			.forEach((p: any) => (otCount += parseFloat(p.period.toFixed(2))));
+		infomation.billing.employeePayment
+			.filter((p: any) => p.paymentEmployee.payment.name === 'เบี้ยเลี้ยง')
+			.forEach((p: any) => (allowanceCount += parseFloat(p.amount.toFixed(2))));
+		infomation.billing.employeePayment
+			.filter((p: any) => p.paymentEmployee.payment.name === 'เบี้ยขยัน')
+			.forEach((p: any) => (deligenceCount += parseFloat(p.amount.toFixed(2))));
+
 		attendances = [
 			...infomation.attendance.map((a: any) => ({
 				date: a.date,
@@ -111,11 +150,11 @@
 				textColor: '#fbfdfd'
 			})),
 			...infomation.billing.employeePayment
-				.filter((p: any) => p.type === 1)
+				.filter((p: any) => p.type === 1 && p.period != 0)
 				.map((pay: any) => ({
 					id: pay.id,
 					date: pay.date,
-					title: `${pay.payment.name} (${pay.period} ชม.)`,
+					title: `${pay.paymentEmployee.payment.name} (${pay.period.toFixed(2)} ชม.)`,
 					allDay: true,
 					editable: true,
 					backgroundColor: '#50B27C',
@@ -125,7 +164,6 @@
 		events = [...attendances, ...holidays];
 		render++;
 	};
-
 	const handleDay = (date: string, e: UIEvent) => {
 		let attend = infomation.attendance.find(
 			(a: any) => pvGetDate(new Date(a.date)) === pvGetDate(new Date(date))
@@ -143,7 +181,6 @@
 		if (attend) {
 			if (attend.type === 'absent') attendance = { ...attendance, type: 'ขาดงาน' };
 			else {
-				console.log(attend);
 				attendance = {
 					type: attend.type === 'late' ? 'มาสาย' : 'เข้างาน',
 					checkin: pvGetHHMM(new Date(attend._min.createdAt)),
@@ -206,20 +243,34 @@
 				width="w-60"
 				rounded="rounded-lg bg-transparent"
 			/>
-			<div class="w-full grid grid-rows-2 gap-2">
-				<span class="text-2xl">{employee.name} </span>
-				<span class="font-bold">{employee.position?.name || '-'}</span>
-				{#if !infomation.billing}
-					<span class="">ขาด 0 / ลากิจ 0 / ลาป่วย 0</span>
-					<span class="">O.T. 0 ชั่วโมง</span>
-					<span class="">เบี้ยเลี้ยง 0 / เบี้ยขยัน 0</span>
-				{:else}
-					<span class=""
-						>ขาด {absent.length} / ลากิจ {businessLeaveCount} / ลาป่วย {sickLeaveCount}</span
-					>
-					<span class="">O.T. 0 ชั่วโมง</span>
-					<span class="">เบี้ยเลี้ยง 0 / เบี้ยขยัน 0</span>
-				{/if}
+			<div class="w-full flex flex-col gap-2">
+				<div class="flex flex-row justify-between">
+					<div class="flex flex-col">
+						<span class="text-2xl">{employee.name} </span>
+						<span class="font-bold">{employee.position?.name || '-'}</span>
+					</div>
+					<select class="select text-sm variant-soft-primary w-min h-min" bind:value={summaryType}>
+						<option value="month">รายเดือน</option>
+						<option value="year">รายปี</option>
+					</select>
+				</div>
+				<div class="flex flex-col h-min">
+					{#if !infomation?.billing}
+						<span class="">เข้างาน 0 / สาย 0 / ขาด 0</span>
+						<span class="">ลากิจ 0 / ลาป่วย 0</span>
+						<span class="">O.T. 0 ชั่วโมง</span>
+						<span class="">เบี้ยเลี้ยง 0 / เบี้ยขยัน 0</span>
+					{:else}
+						<span class="">
+							เข้างาน {attend.length} / สาย {late.length} / ขาด {absent.length}
+						</span>
+						<span class="">
+							ลากิจ {businessLeaveCount} / ลาป่วย {sickLeaveCount}
+						</span>
+						<span class="">O.T. {otCount} ชั่วโมง</span>
+						<span class="">เบี้ยเลี้ยง {allowanceCount} / เบี้ยขยัน {deligenceCount}</span>
+					{/if}
+				</div>
 			</div>
 		</div>
 		<div class="flex justify-between items-center">
@@ -230,7 +281,7 @@
 					handleModal(modalStore, 'Create Attendance', 'createAttendance', AttendanceModal, {
 						formData: { ...employee, infomation }
 					})}
-				disabled={!infomation.billing}
+				disabled={!infomation?.billing?.id}
 			>
 				Issue
 			</button>

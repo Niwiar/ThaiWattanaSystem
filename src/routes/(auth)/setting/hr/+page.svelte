@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
-	import type { PaymentList, PositionList, RoleList, TeamList } from '$src/lib/types/hr';
+	import type { PaymentList, RoleList } from '$src/lib/types/hr';
 	import { toastError, toastSuccess } from '$src/lib/action/toast.action';
 	import { handleModal } from '$src/lib/action';
 	import AlertText from '$src/lib/components/AlertText.svelte';
@@ -29,9 +29,6 @@
 	const toastStore = getToastStore();
 
 	$: {
-		// if (data.positions) positionSource = data.positions;
-		// if (data.teams) teamSource = data.teams;
-		// if (data.roles) roleSource = data.roles;
 		if (data.payments) {
 			otSrc = data.payments.filter((pay: PaymentList) => pay.type === 1) || [];
 			allowanceSrc = data.payments.filter((pay: PaymentList) => pay.type === 2) || [];
@@ -66,7 +63,6 @@
 </script>
 
 <div class="space-y-2">
-	<h2 class="text-lg font-bold">Human Resource Setting</h2>
 	<div class="flex flex-col gap-4">
 		<div class="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_250px]">
 			<div class="flex flex-col">

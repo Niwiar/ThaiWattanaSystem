@@ -86,8 +86,8 @@
 
 <div class="space-y-4">
 	<h2 class="text-lg font-bold">General Setting</h2>
-	<div class="grid grid-cols-1 gap-4 lg:grid-cols-[auto_1fr]">
-		<div class="space-y-4">
+	<div class="grid grid-cols-1 gap-4 lg:grid-cols-[auto_1fr] h-full">
+		<div class="space-y-2">
 			<div class="flex justify-between items-center">
 				<span class="text-lg font-semibold">Workday Setting</span>
 			</div>
@@ -169,7 +169,7 @@
 			</form>
 		</div>
 
-		<div class="space-y-4">
+		<div class="space-y-2">
 			<div class="flex justify-between items-start mb-2">
 				<span class="text-lg font-semibold">Holiday Setting</span>
 				<button
@@ -179,9 +179,9 @@
 					<i class="fa fa-plus" />
 				</button>
 			</div>
-			<div class="card">
+			<div class="card h-[480px] overflow-auto">
 				{#key render}
-					<AttnCalendar events={holidays} {handleDay} {handleEvent} />
+					<AttnCalendar events={holidays} height="h-[40rem]" {handleDay} {handleEvent} />
 				{/key}
 			</div>
 		</div>

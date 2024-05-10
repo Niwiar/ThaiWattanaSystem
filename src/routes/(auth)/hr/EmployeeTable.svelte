@@ -23,13 +23,12 @@
 	const handleSelected = (row: EmployeeList, e: MouseEvent) => {
 		const btn = e.target as HTMLButtonElement;
 		if (btn.nodeName === 'BUTTON')
-			return handleModal(modalStore, 'Edit Employee', 'editEmployee', EmployeeModal, {
+			return handleModal(modalStore, 'Employee Infomation', 'editEmployee', EmployeeModal, {
 				formData: {
 					...row,
 					birthdate: row.birthdate ? row.birthdate.split('T')[0] : null,
 					workdate: row.workdate ? row.workdate.split('T')[0] : null
-				},
-				size: 'w-full max-w-6xl'
+				}
 			});
 		if ($selected.includes(row.id)) {
 			employee = {};

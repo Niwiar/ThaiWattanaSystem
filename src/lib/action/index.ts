@@ -6,13 +6,7 @@ export const handleModal = (
 	title: string,
 	action: string,
 	modal: unknown,
-	props: {
-		formData?: unknown;
-		size?: string;
-	} = {
-		formData: {},
-		size: ''
-	}
+	props: {formData?: unknown;} = {formData: {},}
 ) => {
 	const modalFormComponent: ModalComponent = {
 		ref: modal,

@@ -26,10 +26,9 @@
 	<table class="table table-interactive table-compact">
 		<thead>
 			<tr class="bg-primary-500 text-white">
-				<th rowspan="2" colspan="2" class="text-center">Index</th>
+				<th colspan="2" class="text-center">Index</th>
 				<ThSort {handler} class="!justify-center" orderBy="firstname">Name</ThSort>
 				<ThSort {handler} class="!justify-center" orderBy="attendance">Attendance</ThSort>
-				<th rowspan="2" />
 			</tr>
 		</thead>
 		<tbody>

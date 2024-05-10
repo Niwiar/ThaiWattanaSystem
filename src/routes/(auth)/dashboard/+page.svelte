@@ -94,17 +94,20 @@
 		employeeSource = monthData.attendances.map((a: any) => {
 			const attend = a.attendance.find((at: any) => pvGetDate(new Date(at.date)) === summaryDate);
 			const leave = a.leave.find((at: any) => pvGetDate(new Date(at.date)) === summaryDate);
-			// let checkInTime = attend?._min && new Date(attend._min.createdAt.replaceAll(/Z|T/g, ' '));
-			// checkInTime.setHours(checkInTime.getHours() + 7);
-			// console.log(checkInTime);
+			let checkInTime = new Date();
+			if (attend?._min) {
+				checkInTime = attend?._min && new Date(attend._min.createdAt.replaceAll(/Z|T/g, ' '));
+				checkInTime.setHours(checkInTime.getHours() + 7);
+			}
+
 			return {
 				name: a.employee.name,
 				imageFile: a.employee.imageFile,
 				attendance: attend
 					? attend.type === 'present'
-						? `เข้างาน`
+						? `เข้างาน\n${checkInTime.toLocaleTimeString('en-GB').slice(0, 5)}`
 						: attend.type === 'late'
-						? `สาย`
+						? `สาย\n${checkInTime.toLocaleTimeString('en-GB').slice(0, 5)}`
 						: attend.type === 'absent'
 						? 'ขาดงาน'
 						: '-'
@@ -115,19 +118,20 @@
 					: '-'
 			};
 		});
-		console.log(employeeSource);
+		// console.log(employeeSource);
 	}
 </script>
 
-<div class=" grid grid-cols-1 lg:grid-cols-2 m-6 gap-4">
-	<div class="card h-[520px]">
+<div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] m-6 gap-4 h-full">
+	<div class="card h-full overflow-auto">
 		{#key render}
 			<AttnCalendar bind:date bind:events height="h-[40rem]" {handleDay} />
 		{/key}
 	</div>
-	<div class="h-max space-y-2">
+
+	<div class="h-full space-y-2">
 		<div class="flex justify-between items-center">
-			<span class="text-2xl">Employee Attendance</span>
+			<span class="text-2xl">Attendance</span>
 			<input
 				class="input rounded-md px-2 py-1 w-52 variant-soft-tertiary text-xl text-center"
 				type="date"

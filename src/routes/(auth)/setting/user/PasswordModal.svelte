@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { FILE_LOCATION } from '$src/constant';
 	import ModalFormBase from '$component/base/ModalFormBase.svelte';
-	import ImageInputPreview from '$component/base/ImageInput.svelte';
-	import AvatarInput from '$component/base/AvatarInput.svelte';
-	import type { ActionData } from './$types';
 	import AlertText from '$src/lib/components/AlertText.svelte';
 
 	// Props
@@ -18,7 +14,7 @@
 		<span class="w-24">Password</span>
 		<div class="flex flex-col">
 			<input class="input rounded-md p-2" type="password" name="password" placeholder="Password" />
-			<AlertText alerts={$page.form} field="password" />
+			<AlertText alerts={$page.form} field="password" form="user" />
 		</div>
 	</label>
 </ModalFormBase>

@@ -27,9 +27,12 @@ export const GET: RequestHandler = async ({ url }: RequestEvent) => {
 					id: true,
 					employeeCode: true,
 					name: true,
-					team: { select: { name: true } },
-					role: { select: { name: true } },
 					imageFile: true
+				},
+				include: {
+					position: { select: { name: true } },
+					team: { select: { name: true } },
+					role: { select: { name: true } }
 				},
 				where: { active: true },
 				orderBy: { name: 'asc' }
@@ -41,14 +44,15 @@ export const GET: RequestHandler = async ({ url }: RequestEvent) => {
 };
 
 export const POST: RequestHandler = async ({ request }: RequestEvent) => {
-	const { data, imageFile, citizenCardFile, jobApplicationFile, workPermitFile } =
+	const { data, imageFile, citizenCardFile, jobApplicationFile, workPermitFile }:any =
 		Object.fromEntries(await request.formData());
-
-	const imageFileName = await writeFile(imageFile, 'img', 'employee');
-	const citizenCardFileName = await writeFile(citizenCardFile, 'card', 'employee');
-	const jobApplicationFileName = await writeFile(jobApplicationFile, 'job', 'employee');
-	const workPermitFileName = await writeFile(workPermitFile, 'permit', 'employee');
+	
 	const body = { ...JSON.parse(data.toString()) };
+	const {employeeCode} = body
+	const imageFileName = await writeFile(imageFile, `${employeeCode}_img`, 'employee');
+	const citizenCardFileName = await writeFile(citizenCardFile, `${employeeCode}_card`, 'employee');
+	const jobApplicationFileName = await writeFile(jobApplicationFile, `${employeeCode}_job`, 'employee');
+	const workPermitFileName = await writeFile(workPermitFile, `${employeeCode}_permit`, 'employee');
 	const employeeData = {
 		...body,
 		birthdate: new Date(body.birthdate),

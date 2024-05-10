@@ -7,9 +7,9 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -82,7 +82,7 @@ model Payment {
   amount          Float
   payType         Int // 1 Hourly, 2 Daily, 3 Monthly
   active          Boolean           @default(true)
-  employeePayment EmployeePayment[]
+  paymentEmployee PaymentEmployee[]
 
   @@map("payment")
 }
@@ -115,13 +115,27 @@ model Employee {
   roleId             Int?
   positionId         Int?
   team               Team?                @relation(fields: [teamId], references: [id])
-  role               Role?                @relation(fields: [roleId], references: [id])
+  role               Role?                @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   position           Position?            @relation(fields: [positionId], references: [id])
+  paymentEmployee PaymentEmployee[]
   employeeAttendance EmployeeAttendance[]
   employeeLeave      EmployeeLeave[]
   billing            Billing[]
 
   @@map("employee")
+}
+
+model PaymentEmployee {
+  id  Int @id @default(autoincrement())
+  paymentId Int
+  employeeId Int
+  amount Float
+  active Boolean @default(true)
+  employeePayment EmployeePayment[]
+  payment   Payment  @relation(fields: [paymentId], references: [id])
+  employee   Employee  @relation(fields: [employeeId], references: [id])
+
+  @@map("paymentEmployee")
 }
 
 model EmployeeAttendance {
@@ -155,7 +169,7 @@ model EmployeeLeave {
 model EmployeePayment {
   id        BigInt   @id @default(autoincrement())
   billingId BigInt
-  paymentId Int
+  paymentEmployeeId Int
   date      DateTime @db.Date
   type      Int // 1 OT, 2 Allowance, 3 Welfare, 4 Deduction
   amount    Float
@@ -164,7 +178,7 @@ model EmployeePayment {
   createdAt DateTime @default(now())
   createdBy Int?
   user      User?    @relation(fields: [createdBy], references: [id])
-  payment   Payment  @relation(fields: [paymentId], references: [id])
+  paymentEmployee   PaymentEmployee  @relation(fields: [paymentEmployeeId], references: [id],onDelete: NoAction,onUpdate: NoAction)
   billing   Billing  @relation(fields: [billingId], references: [id])
 
   @@map("employeePayment")
@@ -178,6 +192,7 @@ model Billing {
   salary          Float?
   income          Float?
   deduction       Float?
+  paid            Boolean           @default(false)
   employeePayment EmployeePayment[]
   employee        Employee          @relation(fields: [employeeId], references: [id])
 

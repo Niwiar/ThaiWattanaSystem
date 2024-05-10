@@ -1,4 +1,4 @@
-export const HOST_URL = 'http://192.0.0.51:3000';
+export const HOST_URL = 'http://localhost:3000';
 
 export const MAX_IMAGE_SIZE = 1000000;
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];

@@ -40,7 +40,7 @@
 	const handleEdit = async (e: MouseEvent, row: EmployeeList) => {
 		const btn = e.target as HTMLButtonElement;
 		if (btn.nodeName === 'BUTTON') {
-			const data = await dataFetch(`/api/hr/billing/${row.id}/${month}`);
+			const data = await dataFetch(`/api/hr/billing/${row.id}/${month}?summaryType=month`);
 			if (!data.billing)
 				return toastWarning(
 					toastStore,
@@ -49,8 +49,7 @@
 					})`
 				);
 			return handleModal(modalStore, 'Employee Billing', 'editฺBilling', BillingModal, {
-				formData: { ...row, infomation: data, month, isDisabled: month !== pvGetMonth(new Date()) },
-				size: 'w-full max-w-7xl'
+				formData: { ...row, infomation: data, month },
 			});
 		}
 	};
@@ -58,18 +57,30 @@
 	const handlePrint = async () => {
 		console.log($selected);
 		isPrinting = true;
-		const res = await fetch(`/api/hr/billing/print`, {
+		try{
+			const res = await fetch(`/api/hr/billing/print`, {
 			method: 'POST',
 			body: JSON.stringify({ employeeId: $selected, month })
 		});
 		const result = await res.json();
 		isPrinting = false;
+		console.log(result)
 		if (res.status != 200) return toastError(toastStore, result.message);
 		else
 			handlePreviewModal(modalStore, PreviewModal, {
 				data: SLIP_LOCATION + result.data,
 				title: 'ใบเสร็จ'
 			});
+		}catch(err){
+			console.log(err)
+		}
+		
+		// if (res.status != 200) return toastError(toastStore, result.message);
+		// else
+		// 	handlePreviewModal(modalStore, PreviewModal, {
+		// 		data: SLIP_LOCATION + result.data,
+		// 		title: 'ใบเสร็จ'
+		// 	});
 	};
 
 	$: employeeSource, handler.setRows(employeeSource);

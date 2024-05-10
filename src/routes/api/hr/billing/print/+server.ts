@@ -33,7 +33,6 @@ export const POST: RequestHandler = async ({ request }: RequestEvent) => {
 			}
 		});
 		const billings = await Promise.all(billArr);
-
 		const filepath = await createPDF(`billing_${month}`, await billingDoc(billings));
 		return json({ data: filepath });
 	} catch (err) {

@@ -1,27 +1,27 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { fail } from '@sveltejs/kit';
 
-import type { Actions, PageServerLoad, RequestEvent } from './$types';
+import type { Actions, RequestEvent } from './$types';
 
 import { z } from 'zod';
-import type { PaymentList, PositionList, RoleList, TeamList } from '$src/lib/types/hr';
+// import type { PaymentList, PositionList, RoleList, TeamList } from '$src/lib/types/hr';
 
-export const load: PageServerLoad = async ({ fetch }) => {
-	const positionRes = await fetch('/api/setting/position');
-	const positions = await positionRes.json();
-	const paymentRes = await fetch('/api/setting/payment');
-	const payments = await paymentRes.json();
-	const teamRes = await fetch('/api/setting/team');
-	const teams = await teamRes.json();
-	const roleRes = await fetch('/api/setting/role');
-	const roles = await roleRes.json();
-	return {
-		positions: positionRes.status == 200 ? (positions.data as PositionList[]) : [],
-		teams: teamRes.status == 200 ? (teams.data as TeamList[]) : [],
-		roles: roleRes.status == 200 ? (roles.data as RoleList[]) : [],
-		payments: paymentRes.status == 200 ? (payments.data as PaymentList[]) : null
-	};
-};
+// export const load: PageServerLoad = async ({ fetch }) => {
+// 	const positionRes = await fetch('/api/setting/position');
+// 	const positions = await positionRes.json();
+// 	const paymentRes = await fetch('/api/setting/payment');
+// 	const payments = await paymentRes.json();
+// 	const teamRes = await fetch('/api/setting/team');
+// 	const teams = await teamRes.json();
+// 	const roleRes = await fetch('/api/setting/role');
+// 	const roles = await roleRes.json();
+// 	return {
+// 		positions: positionRes.status == 200 ? (positions.data as PositionList[]) : [],
+// 		teams: teamRes.status == 200 ? (teams.data as TeamList[]) : [],
+// 		roles: roleRes.status == 200 ? (roles.data as RoleList[]) : [],
+// 		payments: paymentRes.status == 200 ? (payments.data as PaymentList[]) : null
+// 	};
+// };
 
 const positionSchema = z.object({
 	name: z.string().nonempty({ message: 'กรุณาใส่ชื่อตำแหน่ง' })

@@ -14,27 +14,27 @@
 	<div class="grid grid-cols-2 gap-2 text-lg">
 		<div>
 			<span class="">วันที่ :</span>
-			<span class="font-bold">{formData.date}</span>
+			<span class="font-medium">{formData.date}</span>
 		</div>
 		<div>
 			<span class="">สถานะ :</span>
-			<span class="font-bold">{formData.type}</span>
+			<span class="font-medium">{formData.type}</span>
 		</div>
 		<div>
 			<span class="">ชื่อพนักงาน :</span>
-			<span class="font-bold">{formData.name}</span>
+			<span class="font-medium">{formData.name}</span>
 		</div>
 		<div>
 			<span class="">ตำแหน่ง :</span>
-			<span class="font-bold">{formData.position.name}</span>
+			<span class="font-medium">{formData.position?.name || '-'}</span>
 		</div>
 		<div>
 			<span class="">ทีม :</span>
-			<span class="font-bold">{formData.team.name}</span>
+			<span class="font-medium">{formData.team?.name || '-'}</span>
 		</div>
 		<div>
 			<span class="">ตำแหน่งงาน :</span>
-			<span class="font-bold">{formData.role.name}</span>
+			<span class="font-medium">{formData.role?.name || '-'}</span>
 		</div>
 	</div>
 	<div class="grid grid-cols-2 text-lg">

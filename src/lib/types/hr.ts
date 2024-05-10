@@ -61,7 +61,7 @@ export type PaymentList = {
 export type BillingList = {
 	id: number;
 	type?: number;
-	payment: { name: string };
+	paymentEmployee:{payment: { name: string }};
 	amount: number;
 	period: number;
 	total: number;
@@ -71,7 +71,7 @@ export type BillingList = {
 export type BillingPrintList = {
 	id: number;
 	type?: number;
-	payment: { name: string };
+	paymentEmployee: {payment: { name: string }};
 	amount: number;
 	period: number;
 	total: number;

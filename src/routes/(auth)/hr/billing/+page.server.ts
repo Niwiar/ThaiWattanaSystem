@@ -30,7 +30,6 @@ export const actions: Actions = {
 					message: err.message
 				};
 			});
-			console.log(warnings);
 			return fail(400, { name: 'billing-print', warning: true, warnings });
 		}
 
@@ -40,8 +39,6 @@ export const actions: Actions = {
 		});
 		const data = await res.json();
 		if (res.status != 200) return fail(403, { error: true, message: data.message });
-		console.log(data);
-		console.log('printed');
 		return {
 			name: 'billing-print',
 			success: true,
@@ -60,19 +57,39 @@ export const actions: Actions = {
 				await updateEmployeePayment(key.replace('welfare', ''), value);
 			else if (key.includes('deduction'))
 				await updateEmployeePayment(key.replace('deduction', ''), value);
-		}
-		console.log(parseInt(formData.id.toString()), parseFloat(formData.salary.toString()));
-		await db.billing.update({
-			where: { id: parseInt(formData.id.toString()) },
-			data: {
-				salary: parseFloat(formData.salary.toString()),
-				payDate: formData.payDate !== '' ? new Date(formData.payDate.toString()) : null
+			else {
+				console.log(key,value)
 			}
-		});
+		}
+		// await db.billing.update({
+		// 	where: { id: parseInt(formData.id.toString()) },
+		// 	data: {
+		// 		salary: parseFloat(formData.salary.toString()),
+		// 		payDate: formData.payDate !== '' ? new Date(formData.payDate.toString()) : null
+		// 	}
+		// });
 		return {
 			name: 'billing',
 			success: true,
 			message: `แก้ไขข้อมูลเงินเดือนพนักงานสำเร็จ`
+		};
+	},
+	paidฺBilling: async (event: RequestEvent) => {
+		const { request } = event;
+		const formData = Object.fromEntries(await request.formData());
+		console.log('formData', formData);
+		if(!formData.payDate) return fail(403, { error: true, message: 'กรุณาใส่วันที่จ่ายเงิน' });
+		// await db.billing.update({
+		// 	where: { id: parseInt(formData.id.toString()) },
+		// 	data: {
+		// 		payDate: formData.payDate !== '' ? new Date(formData.payDate.toString()) : new Date(),
+		// 		paid: true
+		// 	}
+		// });
+		return {
+			name: 'billing',
+			success: true,
+			message: `บันทึกการจ่ายเงินเดือนพนักงานสำเร็จ`
 		};
 	}
 };

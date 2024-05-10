@@ -20,7 +20,7 @@ export const toastWarning = (toastStore: any, message: string, options?: ToastSe
 
 export const toastError = (toastStore: any, message: string, options?: ToastSettings) =>
 	toastStore.trigger({
-		message: `❗ ${message}`,
+		message: `⚠️ ${message}`,
 		autohide: false,
 		background: 'variant-filled-error text-surface-100',
 		...options

@@ -5,7 +5,7 @@
 </script>
 
 <input
-	class="input rounded-md p-2 w-72"
+	class="input rounded-md p-2 w-60"
 	type="text"
 	placeholder="Search..."
 	bind:value

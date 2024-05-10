@@ -10,7 +10,7 @@
 
 	$: {
 		if ($page.form?.success) {
-			if ($page.form.type === 'payment' && $page.form.id === pay.id.toString()) disabled = true;
+			if ($page.form.name === 'payment' && $page.form.id === pay.id.toString()) disabled = true;
 		}
 	}
 </script>

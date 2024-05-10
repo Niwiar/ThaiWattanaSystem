@@ -16,7 +16,11 @@
 			<ul>
 				<li><a href="/setting" class="!rounded-lg {classesActive('/setting')}">General</a></li>
 				<li>
-					<a href="/setting/hr" class="!rounded-lg {classesActive('/setting/hr')}">HR</a>
+					<a
+						href="/setting/hr"
+						class="!rounded-lg {classesActive('/setting/hr') ||
+							classesActive('/setting/hr/employee')}">HR</a
+					>
 				</li>
 				{#if permission['user'] !== '0'}
 					<li>

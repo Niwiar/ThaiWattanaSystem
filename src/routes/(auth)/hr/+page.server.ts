@@ -44,9 +44,9 @@ const leaveSchema = z.object({
 });
 
 const checkinSchema = z.object({
-	checkin: z.string().nonempty({ message: 'กรุณาเลือกประเภทการลา' }),
-	checkout: z.string().nonempty({ message: 'กรุณาเลือกช่วงเวลา' }),
-	date: z.string().nonempty({ message: 'กรุณากำหนดวันเวลาเข้างาน' })
+	checkin: z.string().nonempty({ message: 'กรุณาใส่เวลาเข้างาน' }),
+	checkout: z.string().nonempty({ message: 'กรุณาใส่เวลาออกงาน' }),
+	date: z.string().nonempty({ message: 'กรุณาใส่วันที่' })
 });
 
 const otSchema = z.object({
@@ -83,6 +83,7 @@ export const actions: Actions = {
 			return fail(400, { name: 'attendance', warning: true, warnings });
 		}
 		const { date, checkin, checkout } = checkint.data;
+		console.log(checkint.data);
 		const checkIn = await db.employeeAttendance.create({
 			data: {
 				employeeId: parseInt(formData.id.toString()),
@@ -146,7 +147,7 @@ export const actions: Actions = {
 			const payment = await db.employeePayment.create({
 				data: {
 					billingId: parseInt(billingId),
-					paymentId: parseInt(otId),
+					paymentEmployeeId: parseInt(otId),
 					date: new Date(date),
 					type: 1, // OT
 					amount: parseFloat(amount),
@@ -223,7 +224,7 @@ export const actions: Actions = {
 		const { date, amount, otId, payType, time } = ot.data;
 		await db.employeePayment.update({
 			data: {
-				paymentId: parseInt(otId),
+				paymentEmployeeId: parseInt(otId),
 				date: new Date(date),
 				type: 1, // OT
 				amount: parseFloat(amount),

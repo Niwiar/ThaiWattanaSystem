@@ -12,11 +12,11 @@ export const FiletoBlob = (file: File) => {
 	return new Blob([file], { type: file?.type });
 };
 
-export const writeFile = async (file: unknown, type: string, folder: string) => {
-	if ((file as Blob).name === 'blob' || (file as Blob).name === 'undefined') return '';
-	const fileName = `${crypto.randomUUID()}_${type}.${(file as Blob).type.split('/')[1]}`;
+export const writeFile = async (file: Blob, name: string, folder: string) => {
+	if (file.name === 'blob' || file.name === 'undefined') return '';
+	const fileName = `${name}.${file.type.split('/')[1]}`;
 	const filePath = path.join(process.cwd(), `static`, folder, fileName);
-	await fs.writeFile(filePath, Buffer.from(await (file as Blob).arrayBuffer()));
+	await fs.writeFile(filePath, Buffer.from(await file.arrayBuffer()));
 	return fileName;
 };
 
